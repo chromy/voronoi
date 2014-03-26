@@ -1,5 +1,7 @@
-name: diagram
-description: A sample web application
+name: voronoi
+version: 0.0.1
+author: Hector Dearman
+description: Voronoi is an open-source Dart library for computing Voronoi diagrams. The libary provides methods for construting the Voronoi diagram and the Delaunay triangulation of a set of points. "Voronoi" is a port of as3delaunay which is itself a port of Steven Fortune's C implementation of his sweepline algorithm.
 dependencies:
   browser: any
   unittest: any
