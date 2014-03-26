@@ -1,5 +1,5 @@
-/**
- * A solar system visualization.
+/*
+ * 
  */
 
 library demo;
@@ -38,7 +38,7 @@ class VoronoiDemo {
 
   VoronoiDemo(this.canvas);
 
-  // Initialize the planets and start the simulation.
+  // Initialize the diagram and start the simulation.
   void start() {
     // Measure the canvas element.
     Rectangle rect = canvas.parent.client;
@@ -46,33 +46,43 @@ class VoronoiDemo {
     height = rect.height;
     canvas.width = width;
     
+    // Create random points.
     var rng = new Random();
     Point randomPoint() => new Point(rng.nextInt(width), rng.nextInt(height));
-    var randomPoints = new List.generate(100, (i) => randomPoint());
+    var randomPoints = new List.generate(400, (i) => randomPoint());
     var randomUniquePoints = new Set.from(randomPoints);
-    //for (int i=0; i<10; i++) {
-      voronoi = new Voronoi(new List.from(randomUniquePoints), null, new Rectangle(0, 0, width, height));
-      
-    //}
+    
+    // Compute the diagram.
+    voronoi = new Voronoi(new List.from(randomUniquePoints), null, new Rectangle(0, 0, width, height));
+    
+    // Draw diagram.
     requestRedraw();
   }
 
   void draw(num _) {
+    // Update FPS
     num time = new DateTime.now().millisecondsSinceEpoch;
     if (renderTime != null) showFps(1000 / (time - renderTime));
     renderTime = time;
 
+    // Draw 
     var context = canvas.context2D;
     drawBackground(context);
     drawLines(context);
     drawSites(context);
     requestRedraw();
   }
-
+  
+  /**
+   * Clear the background to white.
+   */
   void drawBackground(CanvasRenderingContext2D context) {
     context.clearRect(0, 0, width, height);
   }
 
+  /**
+   * Draw the sites of the cells on context.
+   */
   void drawSites(CanvasRenderingContext2D context) {
     for (var site in voronoi.siteCoords()) {
       context
@@ -84,11 +94,16 @@ class VoronoiDemo {
     }
   }
   
+  /**
+   * Draw the edges of the cells on context.
+   */
   void drawLines(CanvasRenderingContext2D context) {
-    // Create gradients
 
+    // Don't consider edges which have been clipped completely away.
     var edges = voronoi.edges.where((x) => x.visible);
+    
     for (var edge in edges) {
+      // Create gradient
       var lingrad = context.createLinearGradient(
           edge.leftClippedEnd.x,
           edge.leftClippedEnd.y,
