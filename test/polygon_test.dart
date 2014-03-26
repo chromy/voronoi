@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:unittest/unittest.dart';
-import 'package:diagram/voronoi.dart';
+import 'package:voronoi/voronoi.dart';
 
 main() {
   var smallSquare = new Polygon([new Point(0,0), new Point(1,0), new Point(1,1), new Point(0,1)]);

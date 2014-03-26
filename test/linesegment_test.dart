@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:unittest/unittest.dart';
-import 'package:diagram/voronoi.dart';
+import 'package:voronoi/voronoi.dart';
 
 main() {
   test('lines have length', () {
