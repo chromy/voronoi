@@ -8,7 +8,7 @@ import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 
-import 'package:diagram/voronoi.dart';
+import 'package:voronoi/voronoi.dart';
 
 void main() {
   print("Starting...");
