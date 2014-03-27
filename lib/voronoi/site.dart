@@ -75,14 +75,14 @@ class Site {
       reorderEdges();
       _region = clipToBounds(clippingBounds);
       if ((new Polygon(_region)).winding == Winding.CLOCKWISE) {
-        _region = _region.reversed;
+        _region = new List.from(_region.reversed);
       }
     }
     return _region;
   }
   
   void reorderEdges() {
-    EdgeReorderer reorderer = new EdgeReorderer(_edges, Vertex);
+    EdgeReorderer reorderer = new EdgeReorderer(_edges, "vertex");
     _edges = reorderer.edges;
     _edgeOrientations = reorderer.edgeOrientations;
   }

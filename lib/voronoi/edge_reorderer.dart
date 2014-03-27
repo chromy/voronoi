@@ -4,12 +4,11 @@ class EdgeReorderer {
     List<Edge> _edges;
     List<LR> _edgeOrientations;
     List<Edge> get edges => _edges;
-    
     List<LR> get edgeOrientations => _edgeOrientations;
     
-    EdgeReorderer(List<Edge> origEdges, var criterion) {
-      if (criterion != Vertex && criterion != Site) {
-        throw new ArgumentError("Edges: criterion must be Vertex or Site");
+    EdgeReorderer(List<Edge> origEdges, String criterion) {
+      if (criterion != "vertex" && criterion != "site") {
+        throw new ArgumentError("Edges: criterion must be vertex or site");
       }
       _edges = [];
       _edgeOrientations = [];
@@ -18,24 +17,22 @@ class EdgeReorderer {
       }
     }
 
-    List<Edge> reorderEdges(List<Edge> origEdges, var criterion) {
-      int i, j;
+    List<Edge> reorderEdges(List<Edge> origEdges, String criterion) {
+      int i;
       int n = origEdges.length;
       Edge edge;
       // we're going to reorder the edges in order of traversal
-      List<bool> done = new List(n);
+      List<bool> done = new List.filled(n, false);
       int nDone = 0;
-      for (bool b in done) {
-        b = false;
-      }
       List<Edge> newEdges = [];
       
       i = 0;
       edge = origEdges[i];
       newEdges.add(edge);
       _edgeOrientations.add(LR.LEFT);
-      Point firstPoint = (criterion == Vertex) ? edge.leftVertex : edge.leftSite;
-      Point lastPoint = (criterion == Vertex) ? edge.rightVertex : edge.rightSite;
+      
+      var firstPoint = (criterion == "vertex") ? edge.leftVertex : edge.leftSite;
+      var lastPoint = (criterion == "vertex") ? edge.rightVertex : edge.rightSite;
       
       if (firstPoint == Vertex.VERTEX_AT_INFINITY || lastPoint == Vertex.VERTEX_AT_INFINITY) {
         return [];
@@ -50,8 +47,8 @@ class EdgeReorderer {
             continue;
           }
           edge = origEdges[i];
-          Point leftPoint = (criterion == Vertex) ? edge.leftVertex : edge.leftSite;
-          Point rightPoint = (criterion == Vertex) ? edge.rightVertex : edge.rightSite;
+          var leftPoint = (criterion == "vertex") ? edge.leftVertex : edge.leftSite;
+          var rightPoint = (criterion == "vertex") ? edge.rightVertex : edge.rightSite;
           if (leftPoint == Vertex.VERTEX_AT_INFINITY || rightPoint == Vertex.VERTEX_AT_INFINITY) {
             return [];
           }
@@ -62,13 +59,13 @@ class EdgeReorderer {
             done[i] = true;
           } else if (rightPoint == firstPoint) {
             firstPoint = leftPoint;
-            _edgeOrientations.remove(LR.LEFT);
-            newEdges.remove(edge);
+            _edgeOrientations.insert(0, LR.LEFT);
+            newEdges.insert(0, edge);
             done[i] = true;
           } else if (leftPoint == firstPoint) {
             firstPoint = rightPoint;
-            _edgeOrientations.remove(LR.RIGHT);
-            newEdges.remove(edge);
+            _edgeOrientations.insert(0, LR.RIGHT);
+            newEdges.insert(0, edge);
             done[i] = true;
           } else if (rightPoint == lastPoint) {
             lastPoint = leftPoint;

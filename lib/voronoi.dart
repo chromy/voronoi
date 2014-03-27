@@ -143,7 +143,7 @@ class Voronoi {
       return points;
     }
     
-    EdgeReorderer reorderer = new EdgeReorderer(theHullEdges, Site);
+    EdgeReorderer reorderer = new EdgeReorderer(theHullEdges, "site");
     theHullEdges = reorderer.edges;
     List<LR> orientations = reorderer.edgeOrientations;
     //reorderer.dispose();
