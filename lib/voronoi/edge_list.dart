@@ -13,7 +13,8 @@ class EdgeList {
   
   EdgeList(num xmin, num deltax, int sqrt_nsites) {
     _xmin = xmin;
-    _deltax = deltax;
+    // TODO: fix hack
+    _deltax = deltax == 0 ? 1 : deltax;
     _hashsize = 2 * sqrt_nsites;
 
     int i;
