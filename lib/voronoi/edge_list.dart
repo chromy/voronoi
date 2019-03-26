@@ -17,7 +17,6 @@ class EdgeList {
     _deltax = deltax == 0 ? 1 : deltax;
     _hashsize = 2 * sqrt_nsites;
 
-    int i;
     _hash = new List(_hashsize);
     
     // two dummy Halfedges:

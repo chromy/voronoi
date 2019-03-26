@@ -9,7 +9,7 @@ class Vertex {
   num x, y;
   Point coord;
   int _vertexIndex;
-  
+
   Vertex(num x, num y) {
     this.x = x;
     this.y = y;
@@ -74,6 +74,8 @@ class Vertex {
     
     return new Vertex.create(intersectionX, intersectionY);
   }
+
+  int get vertexIndex => _vertexIndex;
    
   void setIndex() {
      _vertexIndex = _nvertices++;

@@ -45,8 +45,7 @@ class BitmapData {
 class Voronoi {
   SiteList _sites;
   Map<Point, Site> _sitesIndexedByLocation;
-  List<Triangle> _triangles;
-  
+
   List<Edge> _edges;
   List<Edge> get edges => _edges;
   
@@ -60,7 +59,6 @@ class Voronoi {
     _sitesIndexedByLocation = new Map();
     addSites(points, colors);
     _plotBounds = plotBounds;
-    _triangles = new List<Triangle>();
     _edges = new List<Edge>();
     fortunesAlgorithm();
   }
@@ -118,15 +116,15 @@ class Voronoi {
   List<LineSegment> voronoiDiagram() {
     return visibleLineSegments(_edges);
   }
-  
+
   List<LineSegment> delaunayTriangulation({BitmapData keepOutMask: null}) {
     return delaunayLinesForEdges(selectNonIntersectingEdges(keepOutMask, _edges));
   }
-  
+
   List<LineSegment> hull() {
     return delaunayLinesForEdges(hullEdges());
   }
-  
+
   List<Edge> hullEdges() {
     bool myTest(Edge edge) {
       return edge.isPartOfConvexHull();
@@ -344,9 +342,9 @@ class Voronoi {
       edge.clipVertices(_plotBounds);
     }
     // but we don't actually ever use them again!
-    for (Vertex vertex in vertices) {
+    //for (Vertex vertex in vertices) {
       //vertex.dispose();
-    }
+    //}
     vertices.length = 0;
     
   }
