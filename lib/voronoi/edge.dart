@@ -1,11 +1,9 @@
 part of voronoi;
 
-/**
- * The line segment connecting the two Sites is part of the Delaunay triangulation;
- * the line segment connecting the two Vertices is part of the Voronoi diagram
- */
+/// The line segment connecting the two Sites is part of the Delaunay triangulation;
+/// the line segment connecting the two Vertices is part of the Voronoi diagram
 class Edge {
-  static final DELETED = new Edge();
+  static final DELETED = Edge();
 
   // the two input Sites for which this Edge is a bisector:
   Site leftSite;
@@ -26,13 +24,11 @@ class Edge {
 
   Edge();
 
-  /**
-   * This is the only way to create a new Edge 
-   * @param site0
-   * @param site1
-   * @return 
-   * 
-   */
+  /// This is the only way to create a new Edge
+  /// @param site0
+  /// @param site1
+  /// @return
+  ///
   factory Edge.createBisectingEdge(Site site0, Site site1) {
     num dx, dy, absdx, absdy;
     num a, b, c;
@@ -52,7 +48,7 @@ class Edge {
       c /= dy;
     }
 
-    Edge edge = new Edge();
+    Edge edge = Edge();
 
     edge.leftSite = site0;
     edge.rightSite = site1;
@@ -73,15 +69,14 @@ class Edge {
 
   LineSegment delaunayLine() {
     // draw a line connecting the input Sites for which the edge is a bisector:
-    return new LineSegment(leftSite.coord, rightSite.coord);
+    return LineSegment(leftSite.coord, rightSite.coord);
   }
 
   LineSegment voronoiEdge() {
     if (!visible) {
-      return new LineSegment(null, null);
+      return LineSegment(null, null);
     } else {
-      return new LineSegment(
-          _clippedVertices[LR.LEFT], _clippedVertices[LR.RIGHT]);
+      return LineSegment(_clippedVertices[LR.LEFT], _clippedVertices[LR.RIGHT]);
     }
   }
 
@@ -125,12 +120,10 @@ class Edge {
     return _clippedVertices != null;
   }
 
-  /**
-   * Set _clippedVertices to contain the two ends of the portion of the Voronoi edge that is visible
-   * within the bounds.  If no part of the Edge falls within the bounds, leave _clippedVertices null. 
-   * @param bounds
-   * 
-   */
+  /// Set _clippedVertices to contain the two ends of the portion of the Voronoi edge that is visible
+  /// within the bounds.  If no part of the Edge falls within the bounds, leave _clippedVertices null.
+  /// @param bounds
+  ///
   void clipVertices(Rectangle bounds) {
     num xmin = bounds.left;
     num ymin = bounds.top;
@@ -226,13 +219,13 @@ class Edge {
       }
     }
 
-    _clippedVertices = new Map();
+    _clippedVertices = Map();
     if (vertex0 == leftVertex) {
-      _clippedVertices[LR.LEFT] = new Point(x0, y0);
-      _clippedVertices[LR.RIGHT] = new Point(x1, y1);
+      _clippedVertices[LR.LEFT] = Point(x0, y0);
+      _clippedVertices[LR.RIGHT] = Point(x1, y1);
     } else {
-      _clippedVertices[LR.RIGHT] = new Point(x0, y0);
-      _clippedVertices[LR.LEFT] = new Point(x1, y1);
+      _clippedVertices[LR.RIGHT] = Point(x0, y0);
+      _clippedVertices[LR.LEFT] = Point(x1, y1);
     }
   }
 }

@@ -9,8 +9,7 @@ final InputElement slider = querySelector("#slider");
 final InputElement button = querySelector("#button");
 final CanvasElement canvas = querySelector("#area");
 final Element notes = querySelector("#notes");
-final VoronoiDemo demo =
-    new VoronoiDemo(canvas, 10, (new Random()).nextInt(100000));
+final VoronoiDemo demo = VoronoiDemo(canvas, 10, (Random()).nextInt(100000));
 num fpsAverage;
 
 void main() {
@@ -27,7 +26,7 @@ void update() {
 }
 
 void randomiseSeed() {
-  demo.seed = (new Random()).nextInt(100000);
+  demo.seed = (Random()).nextInt(100000);
   update();
 }
 
@@ -62,14 +61,14 @@ class VoronoiDemo {
 
   void recompute() {
     // Create random points.
-    var rng = new Random(seed);
-    Point randomPoint() => new Point(rng.nextInt(width), rng.nextInt(height));
-    var randomPoints = new List.generate(sites, (i) => randomPoint());
-    var randomUniquePoints = new Set.from(randomPoints);
+    var rng = Random(seed);
+    Point randomPoint() => Point(rng.nextInt(width), rng.nextInt(height));
+    var randomPoints = List.generate(sites, (i) => randomPoint());
+    var randomUniquePoints = Set.from(randomPoints);
 
     // Compute the diagram.
-    voronoi = new Voronoi(new List.from(randomUniquePoints), null,
-        new Rectangle(0, 0, width, height));
+    voronoi = Voronoi(
+        List.from(randomUniquePoints), null, Rectangle(0, 0, width, height));
   }
 
   void draw(num _) {

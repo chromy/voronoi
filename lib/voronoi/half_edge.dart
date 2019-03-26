@@ -21,7 +21,7 @@ class Halfedge {
   }
 
   factory Halfedge.createDummy() {
-    return new Halfedge(null, null);
+    return Halfedge(null, null);
   }
 
   String toString() {

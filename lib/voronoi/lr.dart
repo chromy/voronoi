@@ -1,8 +1,8 @@
 part of voronoi;
 
 class LR {
-  static const LR LEFT = const LR._('LEFT');
-  static const LR RIGHT = const LR._('RIGHT');
+  static const LR LEFT = LR._('LEFT');
+  static const LR RIGHT = LR._('RIGHT');
 
   static get values => [LEFT, RIGHT];
 

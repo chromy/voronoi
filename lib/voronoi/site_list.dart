@@ -21,7 +21,7 @@ class SiteList {
   Site next() {
     if (!_sorted) {
       //"SiteList::next():  sites have not been sorted"
-      throw new Error();
+      throw Error();
     }
     if (_currentIndex < _sites.length) {
       return _sites[_currentIndex++];
@@ -38,7 +38,7 @@ class SiteList {
     }
     num xmin, xmax, ymin, ymax;
     if (_sites.length == 0) {
-      return new Rectangle(0, 0, 0, 0);
+      return Rectangle(0, 0, 0, 0);
     }
     xmin = double.maxFinite;
     xmax = double.negativeInfinity;
@@ -54,7 +54,7 @@ class SiteList {
     ymin = _sites[0].y;
     ymax = _sites[_sites.length - 1].y;
 
-    return new Rectangle(xmin, ymin, xmax - xmin, ymax - ymin);
+    return Rectangle(xmin, ymin, xmax - xmin, ymax - ymin);
   }
 
   List<Point> siteCoords() {
@@ -65,12 +65,10 @@ class SiteList {
     return coords;
   }
 
-  /**
-   * 
-   * @return the largest circle centered at each site that fits in its region;
-   * if the region is infinite, return a circle of radius 0.
-   * 
-   */
+  ///
+  /// @return the largest circle centered at each site that fits in its region;
+  /// if the region is infinite, return a circle of radius 0.
+  ///
   List<Circle> circles() {
     List<Circle> circles = [];
     for (Site site in _sites) {
@@ -80,7 +78,7 @@ class SiteList {
       if (!nearestEdge.isPartOfConvexHull()) {
         radius = nearestEdge.sitesDistance() * 0.5;
       }
-      circles.add(new Circle(site.x, site.y, radius));
+      circles.add(Circle(site.x, site.y, radius));
     }
     return circles;
   }

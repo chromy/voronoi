@@ -3,7 +3,7 @@ part of voronoi;
 class Vertex {
   static int _nvertices = 0;
 
-  static final Vertex VERTEX_AT_INFINITY = new Vertex(double.nan, double.nan);
+  static final Vertex VERTEX_AT_INFINITY = Vertex(double.nan, double.nan);
   // TODO: make x and y unsetable
   // TODO: fix coord/vertex
   num x, y;
@@ -13,28 +13,26 @@ class Vertex {
   Vertex(num x, num y) {
     this.x = x;
     this.y = y;
-    coord = new Point(x, y);
+    coord = Point(x, y);
   }
 
   factory Vertex.create(num x, num y) {
     if (x.isNaN || y.isNaN) {
       return VERTEX_AT_INFINITY;
     }
-    return new Vertex(x, y);
+    return Vertex(x, y);
   }
 
   String toString() {
     return "Vertex($x, $y)";
   }
 
-  /**
-   * This is the only way to make a Vertex
-   * 
-   * @param halfedge0
-   * @param halfedge1
-   * @return 
-   * 
-   */
+  /// This is the only way to make a Vertex
+  ///
+  /// @param halfedge0
+  /// @param halfedge1
+  /// @return
+  ///
   factory Vertex.intersect(Halfedge halfedge0, Halfedge halfedge1) {
     Edge edge0, edge1, edge;
     Halfedge halfedge;
@@ -74,7 +72,7 @@ class Vertex {
       return null;
     }
 
-    return new Vertex.create(intersectionX, intersectionY);
+    return Vertex.create(intersectionX, intersectionY);
   }
 
   int get vertexIndex => _vertexIndex;

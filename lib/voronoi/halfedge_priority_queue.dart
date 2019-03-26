@@ -34,10 +34,10 @@ class HalfedgePriorityQueue {
 
     _count = 0;
     _minBucket = 0;
-    _hash = new List(_hashsize);
+    _hash = List(_hashsize);
     // dummy Halfedge at the top of each hash
     for (i = 0; i < _hashsize; ++i) {
-      _hash[i] = new Halfedge.createDummy();
+      _hash[i] = Halfedge.createDummy();
       _hash[i].nextInPriorityQueue = null;
     }
   }
@@ -88,10 +88,8 @@ class HalfedgePriorityQueue {
     return (_hash[bucket].nextInPriorityQueue == null);
   }
 
-  /**
-   * move _minBucket until it contains an actual Halfedge (not just the dummy at the top); 
-   * 
-   */
+  /// move _minBucket until it contains an actual Halfedge (not just the dummy at the top);
+  ///
   void adjustMinBucket() {
     while (_minBucket < _hashsize - 1 && isEmpty(_minBucket)) {
       ++_minBucket;
@@ -102,21 +100,17 @@ class HalfedgePriorityQueue {
     return _count == 0;
   }
 
-  /**
-   * @return coordinates of the Halfedge's vertex in V*, the transformed Voronoi diagram
-   * 
-   */
+  /// @return coordinates of the Halfedge's vertex in V*, the transformed Voronoi diagram
+  ///
   Point min() {
     adjustMinBucket();
     Halfedge answer = _hash[_minBucket].nextInPriorityQueue;
-    return new Point(answer.vertex.x, answer.ystar);
+    return Point(answer.vertex.x, answer.ystar);
   }
 
-  /**
-   * remove and return the min Halfedge
-   * @return 
-   * 
-   */
+  /// remove and return the min Halfedge
+  /// @return
+  ///
   Halfedge extractMin() {
     Halfedge answer;
 

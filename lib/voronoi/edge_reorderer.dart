@@ -8,7 +8,7 @@ class EdgeReorderer {
 
   EdgeReorderer(List<Edge> origEdges, String criterion) {
     if (criterion != "vertex" && criterion != "site") {
-      throw new ArgumentError("Edges: criterion must be vertex or site");
+      throw ArgumentError("Edges: criterion must be vertex or site");
     }
     _edges = [];
     _edgeOrientations = [];
@@ -22,7 +22,7 @@ class EdgeReorderer {
     int n = origEdges.length;
     Edge edge;
     // we're going to reorder the edges in order of traversal
-    List<bool> done = new List.filled(n, false);
+    List<bool> done = List.filled(n, false);
     int nDone = 0;
     List<Edge> newEdges = [];
 

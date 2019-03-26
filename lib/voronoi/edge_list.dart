@@ -17,11 +17,11 @@ class EdgeList {
     _deltax = deltax == 0 ? 1 : deltax;
     _hashsize = 2 * sqrt_nsites;
 
-    _hash = new List(_hashsize);
+    _hash = List(_hashsize);
 
     // two dummy Halfedges:
-    _leftEnd = new Halfedge.createDummy();
-    _rightEnd = new Halfedge.createDummy();
+    _leftEnd = Halfedge.createDummy();
+    _rightEnd = Halfedge.createDummy();
     _leftEnd.edgeListLeftNeighbor = null;
     _leftEnd.edgeListRightNeighbor = _rightEnd;
     _rightEnd.edgeListLeftNeighbor = _leftEnd;
@@ -30,12 +30,10 @@ class EdgeList {
     _hash[_hashsize - 1] = _rightEnd;
   }
 
-  /**
-   * Insert newHalfedge to the right of lb 
-   * @param lb
-   * @param newHalfedge
-   * 
-   */
+  /// Insert newHalfedge to the right of lb
+  /// @param lb
+  /// @param newHalfedge
+  ///
   void insert(Halfedge lb, Halfedge newHalfedge) {
     newHalfedge.edgeListLeftNeighbor = lb;
     newHalfedge.edgeListRightNeighbor = lb.edgeListRightNeighbor;
@@ -43,12 +41,10 @@ class EdgeList {
     lb.edgeListRightNeighbor = newHalfedge;
   }
 
-  /**
-   * This function only removes the Halfedge from the left-right list.
-   * We cannot dispose it yet because we are still using it. 
-   * @param halfEdge
-   * 
-   */
+  /// This function only removes the Halfedge from the left-right list.
+  /// We cannot dispose it yet because we are still using it.
+  /// @param halfEdge
+  ///
   void remove(Halfedge halfEdge) {
     halfEdge.edgeListLeftNeighbor.edgeListRightNeighbor =
         halfEdge.edgeListRightNeighbor;
@@ -58,12 +54,10 @@ class EdgeList {
     halfEdge.edgeListLeftNeighbor = halfEdge.edgeListRightNeighbor = null;
   }
 
-  /**
-   * Find the rightmost Halfedge that is still left of p 
-   * @param p
-   * @return 
-   * 
-   */
+  /// Find the rightmost Halfedge that is still left of p
+  /// @param p
+  /// @return
+  ///
   Halfedge edgeListLeftNeighbor(Point<num> p) {
     int bucket;
     Halfedge halfEdge;

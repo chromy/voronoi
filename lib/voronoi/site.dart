@@ -73,15 +73,15 @@ class Site {
     if (_edgeOrientations == null) {
       reorderEdges();
       _region = clipToBounds(clippingBounds);
-      if ((new Polygon(_region)).winding == Winding.CLOCKWISE) {
-        _region = new List.from(_region.reversed);
+      if ((Polygon(_region)).winding == Winding.CLOCKWISE) {
+        _region = List.from(_region.reversed);
       }
     }
     return _region;
   }
 
   void reorderEdges() {
-    EdgeReorderer reorderer = new EdgeReorderer(_edges, "vertex");
+    EdgeReorderer reorderer = EdgeReorderer(_edges, "vertex");
     _edges = reorderer.edges;
     _edgeOrientations = reorderer.edgeOrientations;
   }
@@ -118,7 +118,7 @@ class Site {
   }
 
   void connect(List<Point> points, int j, Rectangle bounds,
-      {bool closingUp: false}) {
+      {bool closingUp = false}) {
     Point rightPoint = points[points.length - 1];
     Edge newEdge = _edges[j];
     LR newOrientation = _edgeOrientations[j];
@@ -140,10 +140,10 @@ class Site {
           px = bounds.right;
           if (newCheck & BoundsCheck.BOTTOM != 0) {
             py = bounds.bottom;
-            points.add(new Point(px, py));
+            points.add(Point(px, py));
           } else if (newCheck & BoundsCheck.TOP != 0) {
             py = bounds.top;
-            points.add(new Point(px, py));
+            points.add(Point(px, py));
           } else if (newCheck & BoundsCheck.LEFT != 0) {
             if (rightPoint.y - bounds.top + newPoint.y - bounds.top <
                 bounds.height) {
@@ -151,17 +151,17 @@ class Site {
             } else {
               py = bounds.bottom;
             }
-            points.add(new Point(px, py));
-            points.add(new Point(bounds.left, py));
+            points.add(Point(px, py));
+            points.add(Point(bounds.left, py));
           }
         } else if (rightCheck & BoundsCheck.LEFT != 0) {
           px = bounds.left;
           if (newCheck & BoundsCheck.BOTTOM != 0) {
             py = bounds.bottom;
-            points.add(new Point(px, py));
+            points.add(Point(px, py));
           } else if (newCheck & BoundsCheck.TOP != 0) {
             py = bounds.top;
-            points.add(new Point(px, py));
+            points.add(Point(px, py));
           } else if (newCheck & BoundsCheck.RIGHT != 0) {
             if (rightPoint.y - bounds.top + newPoint.y - bounds.top <
                 bounds.height) {
@@ -169,17 +169,17 @@ class Site {
             } else {
               py = bounds.bottom;
             }
-            points.add(new Point(px, py));
-            points.add(new Point(bounds.right, py));
+            points.add(Point(px, py));
+            points.add(Point(bounds.right, py));
           }
         } else if (rightCheck & BoundsCheck.TOP != 0) {
           py = bounds.top;
           if (newCheck & BoundsCheck.RIGHT != 0) {
             px = bounds.right;
-            points.add(new Point(px, py));
+            points.add(Point(px, py));
           } else if (newCheck & BoundsCheck.LEFT != 0) {
             px = bounds.left;
-            points.add(new Point(px, py));
+            points.add(Point(px, py));
           } else if (newCheck & BoundsCheck.BOTTOM != 0) {
             if (rightPoint.x - bounds.top + newPoint.x - bounds.top <
                 bounds.width) {
@@ -187,17 +187,17 @@ class Site {
             } else {
               px = bounds.right;
             }
-            points.add(new Point(px, py));
-            points.add(new Point(px, bounds.bottom));
+            points.add(Point(px, py));
+            points.add(Point(px, bounds.bottom));
           }
         } else if (rightCheck & BoundsCheck.BOTTOM != 0) {
           py = bounds.bottom;
           if (newCheck & BoundsCheck.RIGHT != 0) {
             px = bounds.right;
-            points.add(new Point(px, py));
+            points.add(Point(px, py));
           } else if (newCheck & BoundsCheck.LEFT != 0) {
             px = bounds.left;
-            points.add(new Point(px, py));
+            points.add(Point(px, py));
           } else if (newCheck & BoundsCheck.TOP != 0) {
             if (rightPoint.x - bounds.top + newPoint.x - bounds.top <
                 bounds.width) {
@@ -205,8 +205,8 @@ class Site {
             } else {
               px = bounds.right;
             }
-            points.add(new Point(px, py));
-            points.add(new Point(px, bounds.top));
+            points.add(Point(px, py));
+            points.add(Point(px, bounds.top));
           }
         }
       }
@@ -234,14 +234,12 @@ class Site {
     sites.sort(Site.compare);
   }
 
-  /**
-   * sort sites on y, then x, coord
-   * also change each site's _siteIndex to match its new position in the list
-   * so the _siteIndex can be used to identify the site for nearest-neighbor queries
-   * 
-   * haha "also" - means more than one responsibility...
-   * 
-   */
+  /// sort sites on y, then x, coord
+  /// also change each site's _siteIndex to match its new position in the list
+  /// so the _siteIndex can be used to identify the site for nearest-neighbor queries
+  ///
+  /// haha "also" - means more than one responsibility...
+  ///
   static int compare(Site s1, Site s2) {
     int returnValue = Voronoi.compareByYThenX(s1, s2);
 
@@ -270,13 +268,11 @@ class BoundsCheck {
   static const LEFT = 4;
   static const RIGHT = 8;
 
-  /**
-   * 
-   * @param point
-   * @param bounds
-   * @return an int with the appropriate bits set if the Point lies on the corresponding bounds lines
-   * 
-   */
+  ///
+  /// @param point
+  /// @param bounds
+  /// @return an int with the appropriate bits set if the Point lies on the corresponding bounds lines
+  ///
   static int check(Point point, Rectangle bounds) {
     int value = 0;
     if (point.x == bounds.left) {
@@ -296,6 +292,6 @@ class BoundsCheck {
 
   factory BoundsCheck() {
     //TODO: fix
-    throw new Error();
+    throw Error();
   }
 }
