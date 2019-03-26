@@ -9,7 +9,8 @@ final InputElement slider = querySelector("#slider");
 final InputElement button = querySelector("#button");
 final CanvasElement canvas = querySelector("#area");
 final Element notes = querySelector("#notes");
-final VoronoiDemo demo = new VoronoiDemo(canvas, 10, (new Random()).nextInt(100000));
+final VoronoiDemo demo =
+    new VoronoiDemo(canvas, 10, (new Random()).nextInt(100000));
 num fpsAverage;
 
 void main() {
@@ -46,7 +47,6 @@ class VoronoiDemo {
 
   // Initialize the diagram.
   void start() {
-
     // Measure the canvas element.
     Rectangle rect = canvas.parent.client;
     width = rect.width;
@@ -68,7 +68,8 @@ class VoronoiDemo {
     var randomUniquePoints = new Set.from(randomPoints);
 
     // Compute the diagram.
-    voronoi = new Voronoi(new List.from(randomUniquePoints), null, new Rectangle(0, 0, width, height));
+    voronoi = new Voronoi(new List.from(randomUniquePoints), null,
+        new Rectangle(0, 0, width, height));
   }
 
   void draw(num _) {
@@ -91,7 +92,7 @@ class VoronoiDemo {
       context
         ..fillStyle = '#000'
         ..beginPath()
-        ..arc(site.x, site.y, 1, 0, pi*2, true)
+        ..arc(site.x, site.y, 1, 0, pi * 2, true)
         ..closePath()
         ..fill();
     }
@@ -99,7 +100,6 @@ class VoronoiDemo {
 
   /// Draw the edges of the cells on context.
   void drawLines(CanvasRenderingContext2D context) {
-
     // Don't consider edges which have been clipped completely away.
     var edges = voronoi.edges.where((x) => x.visible);
 
@@ -110,9 +110,7 @@ class VoronoiDemo {
           edge.leftClippedEnd.y,
           edge.rightClippedEnd.x,
           edge.rightClippedEnd.y);
-      lingrad
-        ..addColorStop(0, '#f00')
-        ..addColorStop(1, '#0f0');
+      lingrad..addColorStop(0, '#f00')..addColorStop(1, '#0f0');
 
       context
         ..strokeStyle = lingrad

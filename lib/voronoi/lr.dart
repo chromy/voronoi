@@ -9,10 +9,10 @@ class LR {
   final String name;
 
   const LR._(this.name);
-  
+
   LR get other {
     return this == LEFT ? RIGHT : LEFT;
   }
-  
+
   String toString() => "$name";
 }

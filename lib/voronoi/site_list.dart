@@ -3,21 +3,21 @@ part of voronoi;
 class SiteList {
   List<Site> _sites;
   int _currentIndex;
-  
+
   bool _sorted;
-  
+
   SiteList() {
     _sites = [];
     _sorted = false;
   }
-  
+
   void add(Site site) {
     _sorted = false;
     _sites.add(site);
   }
-  
+
   int get length => _sites.length;
-  
+
   Site next() {
     if (!_sorted) {
       //"SiteList::next():  sites have not been sorted"
@@ -29,7 +29,7 @@ class SiteList {
       return null;
     }
   }
-  
+
   Rectangle getSitesBounds() {
     if (!_sorted) {
       Site.sortSites(_sites);
@@ -53,10 +53,10 @@ class SiteList {
     // here's where we assume that the sites have been sorted on y:
     ymin = _sites[0].y;
     ymax = _sites[_sites.length - 1].y;
-    
+
     return new Rectangle(xmin, ymin, xmax - xmin, ymax - ymin);
   }
-  
+
   List<Point> siteCoords() {
     List<Point> coords = [];
     for (Site site in _sites) {
@@ -64,7 +64,7 @@ class SiteList {
     }
     return coords;
   }
-  
+
   /**
    * 
    * @return the largest circle centered at each site that fits in its region;
@@ -76,7 +76,7 @@ class SiteList {
     for (Site site in _sites) {
       num radius = 0;
       Edge nearestEdge = site.nearestEdge();
-      
+
       if (!nearestEdge.isPartOfConvexHull()) {
         radius = nearestEdge.sitesDistance() * 0.5;
       }
@@ -84,7 +84,7 @@ class SiteList {
     }
     return circles;
   }
-  
+
   List<List<Point>> regions(Rectangle plotBounds) {
     var regions = [];
     for (Site site in _sites) {

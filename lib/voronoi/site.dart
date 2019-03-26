@@ -1,26 +1,25 @@
 part of voronoi;
 
 class Site {
-  
   static const num EPSILON = 0.005;
-  
+
   Point _coord;
   Point get coord => _coord;
   num get x => _coord.x;
   num get y => _coord.y;
-  
+
   int color;
   num weight;
-  
+
   int _siteIndex;
-  
+
   // the edges that define this Site's Voronoi region:
   List<Edge> _edges;
   List<Edge> get edges => _edges;
-  
+
   // which end of each edge hooks up with the previous edge in _edges:
   List<LR> _edgeOrientations;
-  
+
   // ordered list of points that define the region clipped to bounds:
   List<Point> _region;
 
@@ -32,21 +31,21 @@ class Site {
     _edges = [];
     _region = null;
   }
-  
+
   void addEdge(Edge edge) {
     _edges.add(edge);
   }
-  
+
   Edge nearestEdge() {
     _edges.sort(Edge.compareSitesDistances);
     return _edges[0];
   }
-  
+
   List<Site> neighborSites() {
     if (_edges == null || _edges.length == 0) {
       return [];
     }
-    if (_edgeOrientations == null) { 
+    if (_edgeOrientations == null) {
       reorderEdges();
     }
     var list = [];
@@ -56,7 +55,7 @@ class Site {
     }
     return list;
   }
-  
+
   Site neighborSite(Edge edge) {
     if (this == edge.leftSite) {
       return edge.rightSite;
@@ -66,12 +65,12 @@ class Site {
     }
     return null;
   }
-  
+
   List<Point> region(Rectangle clippingBounds) {
     if (_edges == null || _edges.length == 0) {
       return [];
     }
-    if (_edgeOrientations == null) { 
+    if (_edgeOrientations == null) {
       reorderEdges();
       _region = clipToBounds(clippingBounds);
       if ((new Polygon(_region)).winding == Winding.CLOCKWISE) {
@@ -80,13 +79,13 @@ class Site {
     }
     return _region;
   }
-  
+
   void reorderEdges() {
     EdgeReorderer reorderer = new EdgeReorderer(_edges, "vertex");
     _edges = reorderer.edges;
     _edgeOrientations = reorderer.edgeOrientations;
   }
-  
+
   List<Point> clipToBounds(Rectangle bounds) {
     var points = [];
     int n = _edges.length;
@@ -95,7 +94,7 @@ class Site {
     while (i < n && !_edges[i].visible) {
       ++i;
     }
-    
+
     if (i == n) {
       // no edges visible
       return [];
@@ -104,7 +103,7 @@ class Site {
     LR orientation = _edgeOrientations[i];
     points.add(edge.clippedEnds[orientation]);
     points.add(edge.clippedEnds[orientation.other]);
-    
+
     for (int j = i + 1; j < n; ++j) {
       edge = _edges[j];
       if (!edge.visible) {
@@ -114,11 +113,12 @@ class Site {
     }
     // close up the polygon by adding another corner point of the bounds if needed:
     connect(points, i, bounds, closingUp: true);
-    
+
     return points;
   }
-  
-  void connect(List<Point> points, int j, Rectangle bounds, {bool closingUp:false}) {
+
+  void connect(List<Point> points, int j, Rectangle bounds,
+      {bool closingUp: false}) {
     Point rightPoint = points[points.length - 1];
     Edge newEdge = _edges[j];
     LR newOrientation = _edgeOrientations[j];
@@ -127,8 +127,7 @@ class Site {
     if (!closeEnough(rightPoint, newPoint)) {
       // The points do not coincide, so they must have been clipped at the bounds;
       // see if they are on the same border of the bounds:
-      if (rightPoint.x != newPoint.x
-          &&  rightPoint.y != newPoint.y) {
+      if (rightPoint.x != newPoint.x && rightPoint.y != newPoint.y) {
         // They are on different borders of the bounds;
         // insert one or two corners of bounds as needed to hook them up:
         // (NOTE this will not be correct if the region should take up more than
@@ -146,7 +145,8 @@ class Site {
             py = bounds.top;
             points.add(new Point(px, py));
           } else if (newCheck & BoundsCheck.LEFT != 0) {
-            if (rightPoint.y - bounds.top + newPoint.y - bounds.top < bounds.height) {
+            if (rightPoint.y - bounds.top + newPoint.y - bounds.top <
+                bounds.height) {
               py = bounds.top;
             } else {
               py = bounds.bottom;
@@ -163,7 +163,8 @@ class Site {
             py = bounds.top;
             points.add(new Point(px, py));
           } else if (newCheck & BoundsCheck.RIGHT != 0) {
-            if (rightPoint.y - bounds.top + newPoint.y - bounds.top < bounds.height) {
+            if (rightPoint.y - bounds.top + newPoint.y - bounds.top <
+                bounds.height) {
               py = bounds.top;
             } else {
               py = bounds.bottom;
@@ -180,7 +181,8 @@ class Site {
             px = bounds.left;
             points.add(new Point(px, py));
           } else if (newCheck & BoundsCheck.BOTTOM != 0) {
-            if (rightPoint.x - bounds.top + newPoint.x - bounds.top < bounds.width) {
+            if (rightPoint.x - bounds.top + newPoint.x - bounds.top <
+                bounds.width) {
               px = bounds.left;
             } else {
               px = bounds.right;
@@ -197,7 +199,8 @@ class Site {
             px = bounds.left;
             points.add(new Point(px, py));
           } else if (newCheck & BoundsCheck.TOP != 0) {
-            if (rightPoint.x - bounds.top + newPoint.x - bounds.top < bounds.width) {
+            if (rightPoint.x - bounds.top + newPoint.x - bounds.top <
+                bounds.width) {
               px = bounds.left;
             } else {
               px = bounds.right;
@@ -218,20 +221,19 @@ class Site {
       points.add(newRightPoint);
     }
   }
-  
+
   num dist(Point p) {
     return _coord.distanceTo(p);
   }
 
-  
   static bool closeEnough(Point p0, Point p1) {
     return p0.distanceTo(p1) < EPSILON;
   }
-    
+
   static void sortSites(List<Site> sites) {
     sites.sort(Site.compare);
   }
-  
+
   /**
    * sort sites on y, then x, coord
    * also change each site's _siteIndex to match its new position in the list
@@ -242,7 +244,7 @@ class Site {
    */
   static int compare(Site s1, Site s2) {
     int returnValue = Voronoi.compareByYThenX(s1, s2);
-    
+
     // swap _siteIndex values if necessary to match new ordering:
     int tempIndex;
     if (returnValue < 0) {
@@ -260,7 +262,6 @@ class Site {
     }
     return returnValue;
   }
-  
 }
 
 class BoundsCheck {
@@ -268,7 +269,7 @@ class BoundsCheck {
   static const BOTTOM = 2;
   static const LEFT = 4;
   static const RIGHT = 8;
-  
+
   /**
    * 
    * @param point
@@ -292,10 +293,9 @@ class BoundsCheck {
     }
     return value;
   }
-  
+
   factory BoundsCheck() {
     //TODO: fix
     throw new Error();
   }
 }
-

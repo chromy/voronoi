@@ -4,14 +4,14 @@ class Halfedge {
   Halfedge edgeListLeftNeighbor;
   Halfedge edgeListRightNeighbor;
   Halfedge nextInPriorityQueue;
-  
+
   Edge edge;
   LR leftRight;
   Vertex vertex;
-  
+
   // the vertex's y-coordinate in the transformed Voronoi space V*
   num ystar;
-  
+
   Halfedge(Edge edge, LR leftRight) {
     this.edge = edge;
     this.leftRight = leftRight;
@@ -19,15 +19,15 @@ class Halfedge {
     vertex = null;
     ystar = 0;
   }
-  
+
   factory Halfedge.createDummy() {
     return new Halfedge(null, null);
   }
-  
+
   String toString() {
     return "Halfedge(leftRight: $leftRight, vertex: $vertex)";
   }
-  
+
   bool isLeftOf(Point<num> p) {
     Site topSite;
     bool rightOfSite, above, fast;
@@ -35,21 +35,21 @@ class Halfedge {
 
     topSite = edge.rightSite;
     rightOfSite = p.x > topSite.x;
-    
+
     if (rightOfSite && this.leftRight == LR.LEFT) {
       return true;
     }
-    
+
     if (!rightOfSite && this.leftRight == LR.RIGHT) {
       return false;
     }
-    
+
     if (edge.a == 1.0) {
       dyp = p.y - topSite.y;
       dxp = p.x - topSite.x;
       fast = false;
       if ((!rightOfSite && edge.b < 0.0) || (rightOfSite && edge.b >= 0.0)) {
-        above = dyp >= edge.b * dxp;  
+        above = dyp >= edge.b * dxp;
         fast = above;
       } else {
         above = p.x + p.y * edge.b > edge.c;
@@ -63,12 +63,12 @@ class Halfedge {
       if (!fast) {
         dxs = topSite.x - edge.leftSite.x;
         above = edge.b * (dxp * dxp - dyp * dyp) <
-            dxs * dyp * (1.0 + 2.0 * dxp/dxs + edge.b * edge.b);
+            dxs * dyp * (1.0 + 2.0 * dxp / dxs + edge.b * edge.b);
         if (edge.b < 0.0) {
           above = !above;
         }
       }
-    } else  /* edge.b == 1.0 */ {
+    } else /* edge.b == 1.0 */ {
       yl = edge.c - edge.a * p.x;
       t1 = p.y - yl;
       t2 = p.x - topSite.x;

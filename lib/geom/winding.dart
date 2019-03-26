@@ -10,6 +10,6 @@ class Winding {
   final String name;
 
   const Winding._(this.name);
-  
+
   String toString() => "$name";
 }
