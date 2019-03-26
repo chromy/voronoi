@@ -40,8 +40,8 @@ class SiteList {
     if (_sites.length == 0) {
       return new Rectangle(0, 0, 0, 0);
     }
-    xmin = double.MAX_FINITE;
-    xmax = double.NEGATIVE_INFINITY;
+    xmin = double.maxFinite;
+    xmax = double.negativeInfinity;
     for (Site site in _sites) {
       if (site.x < xmin) {
         xmin = site.x;
@@ -77,7 +77,9 @@ class SiteList {
       num radius = 0;
       Edge nearestEdge = site.nearestEdge();
       
-      !nearestEdge.isPartOfConvexHull() && (radius = nearestEdge.sitesDistance() * 0.5);
+      if (!nearestEdge.isPartOfConvexHull()) {
+        radius = nearestEdge.sitesDistance() * 0.5;
+      }
       circles.add(new Circle(site.x, site.y, radius));
     }
     return circles;

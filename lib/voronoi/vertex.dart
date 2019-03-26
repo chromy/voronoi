@@ -3,7 +3,7 @@ part of voronoi;
 class Vertex {
   static int _nvertices = 0;
   
-  static final Vertex VERTEX_AT_INFINITY = new Vertex(double.NAN, double.NAN);
+  static final Vertex VERTEX_AT_INFINITY = new Vertex(double.nan, double.nan);
   // TODO: make x and y unsetable
   // TODO: fix coord/vertex
   num x, y;

@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:voronoi/voronoi.dart';
 
 main() {

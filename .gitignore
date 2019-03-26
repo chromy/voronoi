@@ -4,6 +4,7 @@
 # Don’t commit the following directories created by pub.
 build/
 packages/
+.dart_tool/
 
 # Or the files created by dart2js.
 *.dart.js
@@ -29,7 +30,8 @@ pubspec.lock
 .LSOverride
 
 # Icon must ends with two \r.
-Icon
+Icon
+
 
 # Thumbnails
 ._*

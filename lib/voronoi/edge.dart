@@ -104,8 +104,8 @@ class Edge {
     return leftSite.coord.distanceTo(rightSite.coord);
   }
   
-  static num compareSitesDistances(Edge e1, Edge e2) {
-    return e1.sitesDistance() - e2.sitesDistance();
+  static int compareSitesDistances(Edge e1, Edge e2) {
+    return e1.sitesDistance().compareTo(e2.sitesDistance());
   }
   
   // Once clipVertices() is called, this Dictionary will hold two Points

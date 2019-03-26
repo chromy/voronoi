@@ -91,7 +91,7 @@ class VoronoiDemo {
       context
         ..fillStyle = '#000'
         ..beginPath()
-        ..arc(site.x, site.y, 1, 0, PI*2, true)
+        ..arc(site.x, site.y, 1, 0, pi*2, true)
         ..closePath()
         ..fill();
     }

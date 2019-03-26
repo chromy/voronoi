@@ -240,7 +240,7 @@ class Site {
    * haha "also" - means more than one responsibility...
    * 
    */
-  static num compare(Site s1, Site s2) {
+  static int compare(Site s1, Site s2) {
     int returnValue = Voronoi.compareByYThenX(s1, s2);
     
     // swap _siteIndex values if necessary to match new ordering:
