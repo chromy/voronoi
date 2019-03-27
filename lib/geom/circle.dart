@@ -5,7 +5,7 @@ class Circle {
   num radius;
 
   Circle(num centerX, num centerY, num radius) {
-    this.center = new Point(centerX, centerY);
+    this.center = Point(centerX, centerY);
     this.radius = radius;
   }
 

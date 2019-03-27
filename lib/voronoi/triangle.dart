@@ -5,6 +5,6 @@ class Triangle {
   List<Site> get sites => _sites;
 
   Triangle(Site a, Site b, Site c) {
-    _sites = [ a, b, c ];
+    _sites = [a, b, c];
   }
 }
