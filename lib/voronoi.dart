@@ -14,6 +14,7 @@
 
 library voronoi;
 
+import 'dart:collection';
 import 'dart:math';
 
 part 'geom/circle.dart';

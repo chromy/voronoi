@@ -68,11 +68,15 @@ class Edge {
   // draw a line connecting the input Sites for which the edge is a bisector:
   LineSegment delaunayLine() => LineSegment(leftSite.coord, rightSite.coord);
 
-  LineSegment voronoiEdge() {
-    if (!visible) {
-      return LineSegment(null, null);
+  LineSegment? voronoiEdge() {
+    // Return null if the edge isn't visible, or its clippedVertices don't exist.
+    if (!visible ||
+        _clippedVertices == null ||
+        _clippedVertices![Direction.left] == null ||
+        _clippedVertices![Direction.right] == null) {
+      return null;
     } else {
-      return LineSegment(_clippedVertices?[Direction.left], _clippedVertices?[Direction.right]);
+      return LineSegment(_clippedVertices![Direction.left]!, _clippedVertices![Direction.right]!);
     }
   }
 
