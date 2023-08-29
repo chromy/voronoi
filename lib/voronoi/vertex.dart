@@ -19,9 +19,9 @@ class Vertex<T extends num> extends Point<T> {
   @override
   String toString() => "Vertex($x, $y)";
 
-  static Vertex<num>? intersect(Halfedge halfEdge0, Halfedge halfEdge1) {
+  static Vertex<num>? intersect(HalfEdge halfEdge0, HalfEdge halfEdge1) {
     Edge? edge0, edge1, edge;
-    Halfedge halfEdge;
+    HalfEdge halfEdge;
     num determinant, intersectionX, intersectionY;
     bool rightOfSite;
 
@@ -49,8 +49,8 @@ class Vertex<T extends num> extends Point<T> {
       edge = edge1;
     }
     rightOfSite = intersectionX >= edge.rightSite.x;
-    if ((rightOfSite && halfEdge.leftRight == Direction.left) ||
-        (!rightOfSite && halfEdge.leftRight == Direction.right)) {
+    if ((rightOfSite && halfEdge.direction == Direction.left) ||
+        (!rightOfSite && halfEdge.direction == Direction.right)) {
       return null;
     }
 

@@ -147,13 +147,17 @@ class Voronoi {
     final List<Direction> orientations = reorderer.edgeOrientations;
     //reorderer.dispose();
 
-    Direction orientation;
+    Direction direction;
 
     final int n = theHullEdges.length;
     for (int i = 0; i < n; ++i) {
       final Edge edge = theHullEdges[i];
-      orientation = orientations[i];
-      points.add(edge.site(orientation));
+      direction = orientations[i];
+
+      final Site<num>? site = edge.site(direction);
+      if (site != null) {
+        points.add(site);
+      }
     }
     return points;
   }
@@ -165,7 +169,7 @@ class Voronoi {
     Vertex<num>? v, vertex;
     Point<num>? newintstar;
     Direction leftRight;
-    Halfedge lbnd, rbnd, llbnd, rrbnd, bisector;
+    HalfEdge lbnd, rbnd, llbnd, rrbnd, bisector;
     Edge edge;
 
     final Rectangle<num> dataBounds = _sites.getSitesBounds();
@@ -173,26 +177,26 @@ class Voronoi {
     final int sqrtNSites = sqrt(_sites.length + 4).round();
     final HalfedgePriorityQueue heap = HalfedgePriorityQueue(dataBounds.left, dataBounds.height, sqrtNSites);
     final EdgeList edgeList = EdgeList(dataBounds.left, dataBounds.width, sqrtNSites);
-    final List<Halfedge> halfEdges = <Halfedge>[];
+    final List<HalfEdge> halfEdges = <HalfEdge>[];
     final List<Vertex<num>> vertices = <Vertex<num>>[];
 
     final Site<num>? bottomMostSite = _sites.next();
     newSite = _sites.next();
 
-    Site<num>? leftRegion(Halfedge he) {
+    Site<num>? leftRegion(HalfEdge he) {
       final Edge? edge = he.edge;
       if (edge == null) {
         return bottomMostSite;
       }
-      return edge.site(he.leftRight);
+      return edge.site(he.direction);
     }
 
-    Site<num>? rightRegion(Halfedge he) {
+    Site<num>? rightRegion(HalfEdge he) {
       final Edge? edge = he.edge;
       if (edge == null) {
         return bottomMostSite;
       }
-      return edge.site(he.leftRight?.other);
+      return edge.site(he.direction.other);
     }
 
     for (;;) {
@@ -214,7 +218,7 @@ class Voronoi {
         //trace("new edge: " + edge);
         _edges.add(edge);
 
-        bisector = Halfedge(edge, Direction.left);
+        bisector = HalfEdge(edge, Direction.left);
         halfEdges.add(bisector);
         // inserting two Halfedges into edgeList constitutes Step 10:
         // insert bisector to the right of lbnd:
@@ -226,12 +230,12 @@ class Voronoi {
           heap.remove(lbnd);
           lbnd
             ..vertex = vertex
-            ..ystar = vertex.y + newSite.distanceTo(vertex);
+            ..yStar = vertex.y + newSite.distanceTo(vertex);
           heap.insert(lbnd);
         }
 
         lbnd = bisector;
-        bisector = Halfedge(edge, Direction.right);
+        bisector = HalfEdge(edge, Direction.right);
         halfEdges.add(bisector);
         // second Halfedge for Step 10:
         // insert bisector to the right of lbnd:
@@ -242,7 +246,7 @@ class Voronoi {
           vertices.add(vertex!);
           bisector
             ..vertex = vertex
-            ..ystar = vertex.y + newSite.distanceTo(vertex);
+            ..yStar = vertex.y + newSite.distanceTo(vertex);
           heap.insert(bisector);
         }
 
@@ -260,8 +264,8 @@ class Voronoi {
         //_triangles.push(new Triangle(bottomSite, topSite, rightRegion(lbnd)));
 
         v = lbnd.vertex!..setIndex();
-        lbnd.edge!.setVertex(lbnd.leftRight!, v);
-        rbnd.edge!.setVertex(rbnd.leftRight!, v);
+        lbnd.edge!.setVertex(lbnd.direction, v);
+        rbnd.edge!.setVertex(rbnd.direction, v);
         edgeList.remove(lbnd);
         heap.remove(rbnd);
         edgeList.remove(rbnd);
@@ -274,7 +278,7 @@ class Voronoi {
         }
         edge = Edge.createBisectingEdge(bottomSite, topSite);
         _edges.add(edge);
-        bisector = Halfedge(edge, leftRight);
+        bisector = HalfEdge(edge, leftRight);
         halfEdges.add(bisector);
         edgeList.insertToRightOfHalfEdge(llbnd, bisector);
         edge.setVertex(leftRight.other, v);
@@ -283,14 +287,14 @@ class Voronoi {
           heap.remove(llbnd);
           llbnd
             ..vertex = vertex
-            ..ystar = vertex.y + bottomSite.distanceTo(vertex);
+            ..yStar = vertex.y + bottomSite.distanceTo(vertex);
           heap.insert(llbnd);
         }
         if ((vertex = Vertex.intersect(bisector, rrbnd)) != null) {
           vertices.add(vertex!);
           bisector
             ..vertex = vertex
-            ..ystar = vertex.y + bottomSite.distanceTo(vertex);
+            ..yStar = vertex.y + bottomSite.distanceTo(vertex);
           heap.insert(bisector);
         }
       } else {

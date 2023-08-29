@@ -2,7 +2,7 @@ part of voronoi;
 
 // also known as heap
 class HalfedgePriorityQueue {
-  List<Halfedge> _hash = <Halfedge>[];
+  List<HalfEdge> _hash = <HalfEdge>[];
   int _count = 0;
   int _minBucket = 0;
   late int _hashsize;
@@ -12,7 +12,7 @@ class HalfedgePriorityQueue {
 
   HalfedgePriorityQueue(this._ymin, this._deltay, int sqrtNSites) {
     _hashsize = 4 * sqrtNSites;
-    _hash = List<Halfedge>.filled(_hashsize, Halfedge.createDummy());
+    _hash = List<HalfEdge>.filled(_hashsize, HalfEdge.createDummy());
   }
 
   /*
@@ -28,16 +28,16 @@ class HalfedgePriorityQueue {
   */
 
 
-  void insert(Halfedge halfEdge) {
-    Halfedge? previous, next;
+  void insert(HalfEdge halfEdge) {
+    HalfEdge? previous, next;
     final int insertionBucket = bucket(halfEdge);
     if (insertionBucket < _minBucket) {
       _minBucket = insertionBucket;
     }
     previous = _hash[insertionBucket];
     while ((next = previous?.nextInPriorityQueue) != null &&
-        (halfEdge.ystar > next!.ystar ||
-            (halfEdge.ystar == next.ystar &&
+        (halfEdge.yStar > next!.yStar ||
+            (halfEdge.yStar == next.yStar &&
                 halfEdge.vertex!.x > next.vertex!.x))) {
       previous = next;
     }
@@ -46,8 +46,8 @@ class HalfedgePriorityQueue {
     ++_count;
   }
 
-  void remove(Halfedge halfEdge) {
-    Halfedge previous;
+  void remove(HalfEdge halfEdge) {
+    HalfEdge previous;
     final int removalBucket = bucket(halfEdge);
 
     if (halfEdge.vertex != null) {
@@ -63,8 +63,8 @@ class HalfedgePriorityQueue {
     }
   }
 
-  int bucket(Halfedge halfEdge) {
-    int theBucket = ((halfEdge.ystar - _ymin) / _deltay * _hashsize).round();
+  int bucket(HalfEdge halfEdge) {
+    int theBucket = ((halfEdge.yStar - _ymin) / _deltay * _hashsize).round();
     if (theBucket < 0) {
       theBucket = 0;
     }
@@ -90,15 +90,15 @@ class HalfedgePriorityQueue {
   ///
   Point<num> min() {
     adjustMinBucket();
-    final Halfedge? answer = _hash[_minBucket].nextInPriorityQueue;
-    return Point<num>(answer!.vertex!.x, answer.ystar);
+    final HalfEdge? answer = _hash[_minBucket].nextInPriorityQueue;
+    return Point<num>(answer!.vertex!.x, answer.yStar);
   }
 
   /// remove and return the min Halfedge
   /// @return
   ///
-  Halfedge extractMin() {
-    Halfedge answer;
+  HalfEdge extractMin() {
+    HalfEdge answer;
 
     // get the first real Halfedge in _minBucket
     answer = _hash[_minBucket].nextInPriorityQueue!;

@@ -1,28 +1,28 @@
 part of voronoi;
 
-class EdgeList extends ListBase<Halfedge?> {
+class EdgeList extends ListBase<HalfEdge?> {
   num _deltaX;
   final num _xMin;
   late int _hashSize;
 
-  late List<Halfedge?> _hash;
+  late List<HalfEdge?> _hash;
 
-  late Halfedge _leftEnd;
-  Halfedge get leftEnd => _leftEnd;
+  late HalfEdge _leftEnd;
+  HalfEdge get leftEnd => _leftEnd;
 
-  late Halfedge _rightEnd;
-  Halfedge get rightEnd => _rightEnd;
+  late HalfEdge _rightEnd;
+  HalfEdge get rightEnd => _rightEnd;
 
   EdgeList(this._xMin, this._deltaX, int sqrtNSites) {
     // TODO: fix hack
     _deltaX = _deltaX == 0 ? 1 : _deltaX;
 
     _hashSize = 2 * sqrtNSites;
-    _hash = List<Halfedge?>.filled(_hashSize, null);
+    _hash = List<HalfEdge?>.filled(_hashSize, null);
 
     // two dummy HalfEdges:
-    _leftEnd = Halfedge.createDummy();
-    _rightEnd = Halfedge.createDummy();
+    _leftEnd = HalfEdge.createDummy();
+    _rightEnd = HalfEdge.createDummy();
     _leftEnd..edgeListLeftNeighbor = null
     ..edgeListRightNeighbor = _rightEnd;
     _rightEnd..edgeListLeftNeighbor = _leftEnd
@@ -38,13 +38,13 @@ class EdgeList extends ListBase<Halfedge?> {
   set length(int newLength) => _hash.length = newLength;
 
   @override
-  Halfedge? operator [](int index) => _hash[index];
+  HalfEdge? operator [](int index) => _hash[index];
 
   @override
-  void operator []=(int index, Halfedge? value) => _hash[index] = value;
+  void operator []=(int index, HalfEdge? value) => _hash[index] = value;
 
   /// Insert newHalfEdge to the right of a given other edge.
-  void insertToRightOfHalfEdge(Halfedge leftNeighbor, Halfedge newHalfEdge) {
+  void insertToRightOfHalfEdge(HalfEdge leftNeighbor, HalfEdge newHalfEdge) {
     newHalfEdge..edgeListLeftNeighbor = leftNeighbor
     ..edgeListRightNeighbor = leftNeighbor.edgeListRightNeighbor;
     leftNeighbor.edgeListRightNeighbor!.edgeListLeftNeighbor = newHalfEdge;
@@ -55,7 +55,7 @@ class EdgeList extends ListBase<Halfedge?> {
   /// We cannot dispose it yet because we are still using it.
   @override
   bool remove(Object? halfEdge) {
-    if (halfEdge == null || halfEdge is! Halfedge) {
+    if (halfEdge == null || halfEdge is! HalfEdge) {
       return false;
     }
 
@@ -68,9 +68,9 @@ class EdgeList extends ListBase<Halfedge?> {
   }
 
   /// Find the rightmost HalfEdge that is still left of the given point.
-  Halfedge edgeListLeftNeighbor(Point<num> point) {
+  HalfEdge edgeListLeftNeighbor(Point<num> point) {
     int bucket;
-    Halfedge? halfEdge;
+    HalfEdge? halfEdge;
 
     /* Use hash table to get close to desired halfEdge */
     bucket = ((point.x - _xMin) / _deltaX * _hashSize).round();
@@ -112,12 +112,12 @@ class EdgeList extends ListBase<Halfedge?> {
   }
 
   /* Get entry from hash table, pruning any deleted nodes */
-  Halfedge? getHash(int b) {
+  HalfEdge? getHash(int b) {
     if (b < 0 || b >= _hashSize) {
       return null;
     }
 
-    final Halfedge? halfEdge = this[b];
+    final HalfEdge? halfEdge = this[b];
     if (halfEdge != null && halfEdge.edge == Edge.deleted) {
       /* Hash table points to deleted halfEdge.  Patch as necessary. */
       this[b] = null;

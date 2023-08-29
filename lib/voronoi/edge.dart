@@ -90,11 +90,12 @@ class Edge {
     }
   }
 
-  Site<num> site(Direction? leftRight) {
-    if (leftRight == null) {
-      throw ArgumentError.notNull("leftRight");
+  Site<num>? site(Direction direction) {
+    if (direction == Direction.none) {
+      return null;
     }
-    return (leftRight == Direction.left) ? leftSite : rightSite;
+
+    return (direction == Direction.left) ? leftSite : rightSite;
   }
 
   bool isPartOfConvexHull() => leftVertex == null || rightVertex == null;
