@@ -41,7 +41,7 @@ class Vertex<T extends num> extends Point<T> {
     intersectionX = (edge0.c * edge1.b - edge1.c * edge0.b) / determinant;
     intersectionY = (edge1.c * edge0.a - edge0.c * edge1.a) / determinant;
 
-    if (Voronoi.compareByYThenX(edge0.rightSite, edge1.rightSite.coord) < 0) {
+    if (Voronoi.compareByYThenX(edge0.rightSite, edge1.rightSite) < 0) {
       halfEdge = halfEdge0;
       edge = edge0;
     } else {

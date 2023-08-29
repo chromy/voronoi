@@ -24,7 +24,7 @@ class Halfedge {
       throw ArgumentError.notNull("Halfedge.edge");
     }
 
-    Site topSite;
+    Site<num> topSite;
     bool rightOfSite, above, fast;
     num dxp, dyp, dxs, t1, t2, t3, yl;
 

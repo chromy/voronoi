@@ -87,7 +87,7 @@ class VoronoiDemo {
 
   /// Draw the sites of the cells on context.
   void drawSites(CanvasRenderingContext2D context) {
-    for (final Point<num> site in voronoi.siteCoords()) {
+    for (final Point<num> site in voronoi.sites.sites) {
       context
         ..fillStyle = '#000'
         ..beginPath()

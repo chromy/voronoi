@@ -49,7 +49,8 @@ class BitmapData {}
 
 class Voronoi {
   final SiteList _sites = SiteList();
-  final Map<Point<num>, Site> _sitesIndexedByLocation = <Point<num>, Site>{};
+  SiteList get sites => _sites;
+  final Map<Point<num>, Site<num>> _sitesIndexedByLocation = <Point<num>, Site<num>>{};
 
   final List<Edge> _edges = <Edge>[];
 
@@ -76,13 +77,13 @@ class Voronoi {
   void addSite(Point<num> p, int color, int index) {
     final Random random = Random();
     final num weight = random.nextDouble() * 100;
-    final Site site = Site(p, index, weight, color);
+    final Site<num> site = Site<num>(p.x, p.y, index, weight, color);
     _sites.add(site);
     _sitesIndexedByLocation[p] = site;
   }
 
   List<Point<num>> region(Point<num> p) {
-    final Site? site = _sitesIndexedByLocation[p];
+    final Site<num>? site = _sitesIndexedByLocation[p];
     if (site == null) {
       return <Point<num>>[];
     }
@@ -92,14 +93,14 @@ class Voronoi {
   // TODO: bug: if you call this before you call region(), something goes wrong :(
   List<Point<num>> neighborSitesForSite(Point<num> coord) {
     final List<Point<num>> points = <Point<num>>[];
-    final Site? site = _sitesIndexedByLocation[coord];
+    final Site<num>? site = _sitesIndexedByLocation[coord];
     if (site == null) {
       return points;
     }
-    final List<Site> sites = site.neighborSites();
-    Site neighbor;
+    final List<Site<num>> sites = site.neighborSites();
+    Site<num> neighbor;
     for (neighbor in sites) {
-      points.add(neighbor.coord);
+      points.add(neighbor);
     }
     return points;
   }
@@ -121,7 +122,7 @@ class Voronoi {
   Iterable<LineSegment> delaunayLinesForEdges(Iterable<Edge> edges) => edges.map((Edge edge) => edge.delaunayLine());
 
   Iterable<Edge> selectEdgesForSitePoint(Point<num> coord, Iterable<Edge> edgesToTest) =>
-      edgesToTest.where((Edge edge) => edge.leftSite.coord == coord || edge.rightSite.coord == coord);
+      edgesToTest.where((Edge edge) => edge.leftSite == coord || edge.rightSite == coord);
 
   Iterable<LineSegment> visibleLineSegments(Iterable<Edge> edges) => edges.map((Edge edge) {
         if (edge.visible) {
@@ -152,17 +153,15 @@ class Voronoi {
     for (int i = 0; i < n; ++i) {
       final Edge edge = theHullEdges[i];
       orientation = orientations[i];
-      points.add(edge.site(orientation).coord);
+      points.add(edge.site(orientation));
     }
     return points;
   }
 
   List<List<Point<num>>> regions() => _sites.regions(_plotBounds);
 
-  List<Point<num>> siteCoords() => _sites.siteCoords();
-
   void fortunesAlgorithm() {
-    Site? newSite, bottomSite, topSite, tempSite;
+    Site<num>? newSite, bottomSite, topSite, tempSite;
     Vertex<num>? v, vertex;
     Point<num>? newintstar;
     Direction leftRight;
@@ -177,10 +176,10 @@ class Voronoi {
     final List<Halfedge> halfEdges = <Halfedge>[];
     final List<Vertex<num>> vertices = <Vertex<num>>[];
 
-    final Site? bottomMostSite = _sites.next();
+    final Site<num>? bottomMostSite = _sites.next();
     newSite = _sites.next();
 
-    Site? leftRegion(Halfedge he) {
+    Site<num>? leftRegion(Halfedge he) {
       final Edge? edge = he.edge;
       if (edge == null) {
         return bottomMostSite;
@@ -188,7 +187,7 @@ class Voronoi {
       return edge.site(he.leftRight);
     }
 
-    Site? rightRegion(Halfedge he) {
+    Site<num>? rightRegion(Halfedge he) {
       final Edge? edge = he.edge;
       if (edge == null) {
         return bottomMostSite;
@@ -205,7 +204,7 @@ class Voronoi {
         /* new site is smallest */
 
         // Step 8:
-        lbnd = edgeList.edgeListLeftNeighbor(newSite.coord); // the Halfedge just to the left of newSite
+        lbnd = edgeList.edgeListLeftNeighbor(newSite); // the Halfedge just to the left of newSite
         rbnd = lbnd.edgeListRightNeighbor!; // the Halfedge just to the right
         bottomSite = rightRegion(lbnd); // this is the same as leftRegion(rbnd)
         // this Site determines the region containing the new site
@@ -227,7 +226,7 @@ class Voronoi {
           heap.remove(lbnd);
           lbnd
             ..vertex = vertex
-            ..ystar = vertex.y + newSite.dist(vertex);
+            ..ystar = vertex.y + newSite.distanceTo(vertex);
           heap.insert(lbnd);
         }
 
@@ -243,7 +242,7 @@ class Voronoi {
           vertices.add(vertex!);
           bisector
             ..vertex = vertex
-            ..ystar = vertex.y + newSite.dist(vertex);
+            ..ystar = vertex.y + newSite.distanceTo(vertex);
           heap.insert(bisector);
         }
 
@@ -284,14 +283,14 @@ class Voronoi {
           heap.remove(llbnd);
           llbnd
             ..vertex = vertex
-            ..ystar = vertex.y + bottomSite.dist(vertex);
+            ..ystar = vertex.y + bottomSite.distanceTo(vertex);
           heap.insert(llbnd);
         }
         if ((vertex = Vertex.intersect(bisector, rrbnd)) != null) {
           vertices.add(vertex!);
           bisector
             ..vertex = vertex
-            ..ystar = vertex.y + bottomSite.dist(vertex);
+            ..ystar = vertex.y + bottomSite.distanceTo(vertex);
           heap.insert(bisector);
         }
       } else {
@@ -319,7 +318,7 @@ class Voronoi {
     vertices.length = 0;
   }
 
-  static int compareByYThenX(Site s1, Point<num>? s2) {
+  static int compareByYThenX(Site<num> s1, Point<num>? s2) {
     if (s2 == null) {
       return 0;
     }

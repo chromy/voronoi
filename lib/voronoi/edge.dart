@@ -6,8 +6,8 @@ class Edge {
   static final Edge deleted = Edge();
 
   // the two input Sites for which this Edge is a bisector:
-  late Site leftSite;
-  late Site rightSite;
+  late Site<num> leftSite;
+  late Site<num> rightSite;
 
   // the two Voronoi vertices that the edge connects
   //    (if one of them is null, the edge extends to infinity)
@@ -30,7 +30,7 @@ class Edge {
   /// @param site1
   /// @return
   ///
-  factory Edge.createBisectingEdge(Site site0, Site site1) {
+  factory Edge.createBisectingEdge(Site<num> site0, Site<num> site1) {
     num dx, dy, absdx, absdy;
     num a, b, c;
 
@@ -66,7 +66,7 @@ class Edge {
   }
 
   // draw a line connecting the input Sites for which the edge is a bisector:
-  LineSegment delaunayLine() => LineSegment(leftSite.coord, rightSite.coord);
+  LineSegment delaunayLine() => LineSegment(leftSite, rightSite);
 
   LineSegment? voronoiEdge() {
     // Return null if the edge isn't visible, or its clippedVertices don't exist.
@@ -90,7 +90,7 @@ class Edge {
     }
   }
 
-  Site site(Direction? leftRight) {
+  Site<num> site(Direction? leftRight) {
     if (leftRight == null) {
       throw ArgumentError.notNull("leftRight");
     }
@@ -99,7 +99,7 @@ class Edge {
 
   bool isPartOfConvexHull() => leftVertex == null || rightVertex == null;
 
-  num sitesDistance() => leftSite.coord.distanceTo(rightSite.coord);
+  num sitesDistance() => leftSite.distanceTo(rightSite);
 
   static int compareSitesDistances(Edge e1, Edge e2) => e1.sitesDistance().compareTo(e2.sitesDistance());
 

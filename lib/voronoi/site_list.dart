@@ -1,21 +1,22 @@
 part of voronoi;
 
 class SiteList {
-  final List<Site> _sites = <Site>[];
+  final List<Site<num>> _sites = <Site<num>>[];
+  List<Site<num>> get sites => _sites;
   int _currentIndex = 0;
 
   bool _sorted = false;
 
   SiteList();
 
-  void add(Site site) {
+  void add(Site<num> site) {
     _sorted = false;
     _sites.add(site);
   }
 
   int get length => _sites.length;
 
-  Site? next() {
+  Site<num>? next() {
     if (!_sorted) {
       //"SiteList::next():  sites have not been sorted"
       throw Error();
@@ -39,7 +40,7 @@ class SiteList {
     }
     xmin = double.maxFinite;
     xmax = double.negativeInfinity;
-    for (final Site site in _sites) {
+    for (final Site<num> site in _sites) {
       if (site.x < xmin) {
         xmin = site.x;
       }
@@ -54,35 +55,27 @@ class SiteList {
     return Rectangle<num>(xmin, ymin, xmax - xmin, ymax - ymin);
   }
 
-  List<Point<num>> siteCoords() {
-    final List<Point<num>> coords = <Point<num>>[];
-    for (final Site site in _sites) {
-      coords.add(site.coord);
-    }
-    return coords;
-  }
-
   ///
   /// @return the largest circle centered at each site that fits in its region;
   /// if the region is infinite, return a circle of radius 0.
   ///
   List<Circle> circles() {
     final List<Circle> circles = <Circle>[];
-    for (final Site site in _sites) {
+    for (final Site<num> site in _sites) {
       num radius = 0;
       final Edge nearestEdge = site.nearestEdge();
 
       if (!nearestEdge.isPartOfConvexHull()) {
         radius = nearestEdge.sitesDistance() * 0.5;
       }
-      circles.add(Circle(site._coord, radius));
+      circles.add(Circle(site, radius));
     }
     return circles;
   }
 
   List<List<Point<num>>> regions(Rectangle<num> plotBounds) {
     final List<List<Point<num>>> regions = <List<Point<num>>>[];
-    for (final Site site in _sites) {
+    for (final Site<num> site in _sites) {
       regions.add(site.region(plotBounds));
     }
     return regions;

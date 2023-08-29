@@ -1,12 +1,7 @@
 part of voronoi;
 
-class Site {
+class Site<T extends num> extends Point<T> {
   static const num epsilon = 0.005;
-
-  final Point<num> _coord;
-  Point<num> get coord => _coord;
-  num get x => _coord.x;
-  num get y => _coord.y;
 
   int color;
   num weight;
@@ -23,7 +18,7 @@ class Site {
   // ordered list of points that define the region clipped to bounds:
   List<Point<num>>? _region;
 
-  Site(this._coord, this._siteIndex, this.weight, this.color);
+  Site(super.x, super.y, this._siteIndex, this.weight, this.color);
 
   void addEdge(Edge edge) {
     _edges.add(edge);
@@ -34,14 +29,14 @@ class Site {
     return _edges[0];
   }
 
-  List<Site> neighborSites() {
+  List<Site<num>> neighborSites() {
     if (_edges.isEmpty) {
-      return <Site>[];
+      return <Site<num>>[];
     }
     if (_edgeOrientations == null) {
       reorderEdges();
     }
-    final List<Site> list = <Site>[];
+    final List<Site<num>> list = <Site<num>>[];
     Edge edge;
     for (edge in _edges) {
       if (neighborSite(edge) != null) {
@@ -51,7 +46,7 @@ class Site {
     return list;
   }
 
-  Site? neighborSite(Edge edge) {
+  Site<num>? neighborSite(Edge edge) {
     if (this == edge.leftSite) {
       return edge.rightSite;
     }
@@ -217,11 +212,9 @@ class Site {
     }
   }
 
-  num dist(Point<num> p) => _coord.distanceTo(p);
-
   static bool closeEnough(Point<num> p0, Point<num> p1) => p0.distanceTo(p1) < epsilon;
 
-  static void sortSites(List<Site> sites) => sites.sort(Site.compare);
+  static void sortSites(List<Site<num>> sites) => sites.sort(Site.compare);
 
   /// sort sites on y, then x, coord
   /// also change each site's _siteIndex to match its new position in the list
@@ -229,8 +222,8 @@ class Site {
   ///
   /// haha "also" - means more than one responsibility...
   ///
-  static int compare(Site s1, Site s2) {
-    final int returnValue = Voronoi.compareByYThenX(s1, s2.coord);
+  static int compare(Site<num> s1, Site<num> s2) {
+    final int returnValue = Voronoi.compareByYThenX(s1, s2);
 
     // swap _siteIndex values if necessary to match new ordering:
     int tempIndex;
