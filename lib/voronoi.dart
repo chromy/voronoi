@@ -39,7 +39,7 @@ part 'voronoi/site.dart';
 
 part 'voronoi/site_list.dart';
 
-part 'voronoi/triangle.dart';
+part 'geom/triangle.dart';
 
 part 'voronoi/edge_reorderer.dart';
 
