@@ -9,37 +9,29 @@ class Edge {
   late Site<num> leftSite;
   late Site<num> rightSite;
 
-  // the two Voronoi vertices that the edge connects
-  //    (if one of them is null, the edge extends to infinity)
-  late Vertex<num>? leftVertex;
-  late Vertex<num>? rightVertex;
+  // the two Voronoi vertices that the edge connects (if one of them is null, the edge extends to infinity)
+  VertexPair<Vertex<num>?> vertices = VertexPair<Vertex<num>?>(null, null);
 
-  Point<num>? get leftClippedEnd => _clippedVertices?[Direction.left];
-
-  Point<num>? get rightClippedEnd => _clippedVertices?[Direction.right];
+  VertexPair<Point<num>?> _clippedVertices = VertexPair<Point<num>?>(null, null);
+  Point<num>? get leftClippedEnd => _clippedVertices[Direction.left];
+  Point<num>? get rightClippedEnd => _clippedVertices[Direction.right];
 
   // the equation of the edge: ax + by = c
   late num a, b, c;
 
-  late Map<Direction, Point<num>>? _clippedVertices;
-
   Edge();
 
   /// This is the only way to create a new Edge
-  /// @param site0
-  /// @param site1
-  /// @return
-  ///
   factory Edge.createBisectingEdge(Site<num> site0, Site<num> site1) {
-    num dx, dy, absdx, absdy;
+    num dx, dy, absDx, absDy;
     num a, b, c;
 
     dx = site1.x - site0.x;
     dy = site1.y - site0.y;
-    absdx = dx > 0 ? dx : -dx;
-    absdy = dy > 0 ? dy : -dy;
+    absDx = dx > 0 ? dx : -dx;
+    absDy = dy > 0 ? dy : -dy;
     c = site0.x * dx + site0.y * dy + (dx * dx + dy * dy) * 0.5;
-    if (absdx > absdy) {
+    if (absDx > absDy) {
       a = 1.0;
       b = dy / dx;
       c /= dx;
@@ -52,12 +44,11 @@ class Edge {
     final Edge edge = Edge()
       ..leftSite = site0
       ..rightSite = site1
-      ..leftVertex = null
-      ..rightVertex = null
+      ..vertices[Direction.both] = null
       ..a = a
       ..b = b
       ..c = c
-      .._clippedVertices = null;
+      .._clippedVertices[Direction.both] = null;
 
     site0.addEdge(edge);
     site1.addEdge(edge);
@@ -69,24 +60,11 @@ class Edge {
   LineSegment delaunayLine() => LineSegment(leftSite, rightSite);
 
   LineSegment? voronoiEdge() {
-    // Return null if the edge isn't visible, or its clippedVertices don't exist.
-    if (!visible ||
-        _clippedVertices == null ||
-        _clippedVertices![Direction.left] == null ||
-        _clippedVertices![Direction.right] == null) {
+    // Return null if the edge isn't visible
+    if (!visible) {
       return null;
     } else {
-      return LineSegment(_clippedVertices![Direction.left]!, _clippedVertices![Direction.right]!);
-    }
-  }
-
-  Vertex<num>? vertex(Direction leftRight) => (leftRight == Direction.left) ? leftVertex : rightVertex;
-
-  void setVertex(Direction leftRight, Vertex<num> v) {
-    if (leftRight == Direction.left) {
-      leftVertex = v;
-    } else {
-      rightVertex = v;
+      return LineSegment(_clippedVertices[Direction.left]!, _clippedVertices[Direction.right]!);
     }
   }
 
@@ -98,126 +76,126 @@ class Edge {
     return (direction == Direction.left) ? leftSite : rightSite;
   }
 
-  bool isPartOfConvexHull() => leftVertex == null || rightVertex == null;
+  bool isPartOfConvexHull() => !vertices.isDefined(Direction.both);
 
   num sitesDistance() => leftSite.distanceTo(rightSite);
 
   static int compareSitesDistances(Edge e1, Edge e2) => e1.sitesDistance().compareTo(e2.sitesDistance());
 
-  // Once clipVertices() is called, this Dictionary will hold two Points
+  // Once clipVertices() is called, this object will hold two Points
   // representing the clipped coordinates of the left and right ends...
-  Map<Direction, Point<num>>? get clippedEnds => _clippedVertices;
+  VertexPair<Point<num>?> get clippedEnds => _clippedVertices;
 
-  // unless the entire Edge is outside the bounds.
-  // In that case visible will be false:
-  bool get visible => _clippedVertices != null;
+  // The only edges that should be visible are those whose clipped vertices are both non-null.
+  bool get visible => !_clippedVertices.isDefined(Direction.none);
 
   /// Set _clippedVertices to contain the two ends of the portion of the Voronoi edge that is visible
   /// within the bounds.  If no part of the Edge falls within the bounds, leave _clippedVertices null.
   /// @param bounds
   ///
   void clipVertices(Rectangle<num> bounds) {
-    final num xmin = bounds.left;
-    final num ymin = bounds.top;
-    final num xmax = bounds.right;
-    final num ymax = bounds.bottom;
+    final num xMin = bounds.left;
+    final num yMin = bounds.top;
+    final num xMax = bounds.right;
+    final num yMax = bounds.bottom;
 
     Vertex<num>? vertex0, vertex1;
     num x0, x1, y0, y1;
 
+    _clippedVertices = VertexPair<Point<num>?>(null, null);
+
     if (a == 1.0 && b >= 0.0) {
-      vertex0 = rightVertex;
-      vertex1 = leftVertex;
+      vertex0 = vertices[Direction.right];
+      vertex1 = vertices[Direction.left];
     } else {
-      vertex0 = leftVertex;
-      vertex1 = rightVertex;
+      vertex0 = vertices[Direction.left];
+      vertex1 = vertices[Direction.right];
     }
 
     if (a == 1.0) {
-      y0 = ymin;
-      if (vertex0 != null && vertex0.y > ymin) {
+      y0 = yMin;
+      if (vertex0 != null && vertex0.y > yMin) {
         y0 = vertex0.y;
       }
-      if (y0 > ymax) {
+      if (y0 > yMax) {
         return;
       }
       x0 = c - b * y0;
 
-      y1 = ymax;
-      if (vertex1 != null && vertex1.y < ymax) {
+      y1 = yMax;
+      if (vertex1 != null && vertex1.y < yMax) {
         y1 = vertex1.y;
       }
-      if (y1 < ymin) {
+      if (y1 < yMin) {
         return;
       }
       x1 = c - b * y1;
 
-      if ((x0 > xmax && x1 > xmax) || (x0 < xmin && x1 < xmin)) {
+      if ((x0 > xMax && x1 > xMax) || (x0 < xMin && x1 < xMin)) {
         return;
       }
 
-      if (x0 > xmax) {
-        x0 = xmax;
+      if (x0 > xMax) {
+        x0 = xMax;
         y0 = (c - x0) / b;
-      } else if (x0 < xmin) {
-        x0 = xmin;
+      } else if (x0 < xMin) {
+        x0 = xMin;
         y0 = (c - x0) / b;
       }
 
-      if (x1 > xmax) {
-        x1 = xmax;
+      if (x1 > xMax) {
+        x1 = xMax;
         y1 = (c - x1) / b;
-      } else if (x1 < xmin) {
-        x1 = xmin;
+      } else if (x1 < xMin) {
+        x1 = xMin;
         y1 = (c - x1) / b;
       }
     } else {
-      x0 = xmin;
-      if (vertex0 != null && vertex0.x > xmin) {
+      x0 = xMin;
+      if (vertex0 != null && vertex0.x > xMin) {
         x0 = vertex0.x;
       }
-      if (x0 > xmax) {
+      if (x0 > xMax) {
         return;
       }
       y0 = c - a * x0;
 
-      x1 = xmax;
-      if (vertex1 != null && vertex1.x < xmax) {
+      x1 = xMax;
+      if (vertex1 != null && vertex1.x < xMax) {
         x1 = vertex1.x;
       }
-      if (x1 < xmin) {
+      if (x1 < xMin) {
         return;
       }
       y1 = c - a * x1;
 
-      if ((y0 > ymax && y1 > ymax) || (y0 < ymin && y1 < ymin)) {
+      if ((y0 > yMax && y1 > yMax) || (y0 < yMin && y1 < yMin)) {
         return;
       }
 
-      if (y0 > ymax) {
-        y0 = ymax;
+      if (y0 > yMax) {
+        y0 = yMax;
         x0 = (c - y0) / a;
-      } else if (y0 < ymin) {
-        y0 = ymin;
+      } else if (y0 < yMin) {
+        y0 = yMin;
         x0 = (c - y0) / a;
       }
 
-      if (y1 > ymax) {
-        y1 = ymax;
+      if (y1 > yMax) {
+        y1 = yMax;
         x1 = (c - y1) / a;
-      } else if (y1 < ymin) {
-        y1 = ymin;
+      } else if (y1 < yMin) {
+        y1 = yMin;
         x1 = (c - y1) / a;
       }
     }
 
-    _clippedVertices = <Direction, Point<num>>{};
-    if (vertex0 == leftVertex) {
-      _clippedVertices?[Direction.left] = Point<num>(x0, y0);
-      _clippedVertices?[Direction.right] = Point<num>(x1, y1);
+    if (vertex0 == vertices[Direction.left]) {
+      _clippedVertices[Direction.left] = Point<num>(x0, y0);
+      _clippedVertices[Direction.right] = Point<num>(x1, y1);
     } else {
-      _clippedVertices?[Direction.right] = Point<num>(x0, y0);
-      _clippedVertices?[Direction.left] = Point<num>(x1, y1);
+      _clippedVertices[Direction.right] = Point<num>(x0, y0);
+      _clippedVertices[Direction.left] = Point<num>(x1, y1);
     }
   }
 }

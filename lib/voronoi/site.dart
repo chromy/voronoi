@@ -90,9 +90,9 @@ class Site<T extends num> extends Point<T> {
       return <Point<num>>[];
     }
     edge = _edges[i];
-    final Direction orientation = _edgeOrientations![i];
-    points..add(edge.clippedEnds![orientation]!)
-    ..add(edge.clippedEnds![orientation.other]!);
+    final Direction direction = _edgeOrientations![i];
+    points..add(edge.clippedEnds[direction]!)
+    ..add(edge.clippedEnds[direction.other]!);
 
     for (int j = i + 1; j < n; ++j) {
       edge = _edges[j];
@@ -113,7 +113,7 @@ class Site<T extends num> extends Point<T> {
     final Edge newEdge = _edges[j];
     final Direction newOrientation = _edgeOrientations![j];
     // the point that  must be connected to rightPoint:
-    final Point<num> newPoint = newEdge.clippedEnds![newOrientation]!;
+    final Point<num> newPoint = newEdge.clippedEnds[newOrientation]!;
     if (!closeEnough(rightPoint, newPoint)) {
       // The points do not coincide, so they must have been clipped at the bounds;
       // see if they are on the same border of the bounds:
@@ -206,7 +206,7 @@ class Site<T extends num> extends Point<T> {
       }
       points.add(newPoint);
     }
-    final Point<num> newRightPoint = newEdge.clippedEnds![newOrientation.other]!;
+    final Point<num> newRightPoint = newEdge.clippedEnds[newOrientation.other]!;
     if (!closeEnough(points[0], newRightPoint)) {
       points.add(newRightPoint);
     }

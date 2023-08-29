@@ -21,34 +21,37 @@ part 'geom/circle.dart';
 
 part 'geom/line_segment.dart';
 
+part 'geom/triangle.dart';
+
 part 'geom/polygon.dart';
 
 part 'geom/winding.dart';
+
+part 'voronoi/direction.dart';
 
 part 'voronoi/edge.dart';
 
 part 'voronoi/edge_list.dart';
 
-part 'voronoi/direction.dart';
-
-part 'voronoi/vertex.dart';
+part 'voronoi/edge_reorderer.dart';
 
 part 'voronoi/half_edge.dart';
+
+part 'voronoi/halfedge_priority_queue.dart';
 
 part 'voronoi/site.dart';
 
 part 'voronoi/site_list.dart';
 
-part 'geom/triangle.dart';
+part 'voronoi/vertex.dart';
 
-part 'voronoi/edge_reorderer.dart';
-
-part 'voronoi/halfedge_priority_queue.dart';
+part 'voronoi/vertex_pair.dart';
 
 class BitmapData {}
 
 class Voronoi {
   final SiteList<num> _sites = SiteList<num>();
+
   List<Site<num>> get sites => _sites.toList();
   final Map<Point<num>, Site<num>> _sitesIndexedByLocation = <Point<num>, Site<num>>{};
 
@@ -126,8 +129,8 @@ class Voronoi {
 
   Iterable<LineSegment> visibleLineSegments(Iterable<Edge> edges) => edges.map((Edge edge) {
         if (edge.visible) {
-          final Point<num> p1 = edge.clippedEnds![Direction.left]!;
-          final Point<num> p2 = edge.clippedEnds![Direction.right]!;
+          final Point<num> p1 = edge.clippedEnds[Direction.left]!;
+          final Point<num> p2 = edge.clippedEnds[Direction.right]!;
           return LineSegment(p1, p2);
         }
       }).whereType<LineSegment>();
@@ -168,7 +171,7 @@ class Voronoi {
     Site<num>? newSite, bottomSite, topSite, tempSite;
     Vertex<num>? v, vertex;
     Point<num>? newintstar;
-    Direction leftRight;
+    Direction direction;
     HalfEdge lbnd, rbnd, llbnd, rrbnd, bisector;
     Edge edge;
 
@@ -264,24 +267,24 @@ class Voronoi {
         //_triangles.push(new Triangle(bottomSite, topSite, rightRegion(lbnd)));
 
         v = lbnd.vertex!..setIndex();
-        lbnd.edge!.setVertex(lbnd.direction, v);
-        rbnd.edge!.setVertex(rbnd.direction, v);
+        lbnd.edge!.vertices[lbnd.direction] = v;
+        rbnd.edge!.vertices[rbnd.direction] = v;
         edgeList.remove(lbnd);
         heap.remove(rbnd);
         edgeList.remove(rbnd);
-        leftRight = Direction.left;
+        direction = Direction.left;
         if (bottomSite!.y > topSite!.y) {
           tempSite = bottomSite;
           bottomSite = topSite;
           topSite = tempSite;
-          leftRight = Direction.right;
+          direction = Direction.right;
         }
         edge = Edge.createBisectingEdge(bottomSite, topSite);
         _edges.add(edge);
-        bisector = HalfEdge(edge, leftRight);
+        bisector = HalfEdge(edge, direction);
         halfEdges.add(bisector);
         edgeList.insertToRightOfHalfEdge(llbnd, bisector);
-        edge.setVertex(leftRight.other, v);
+        edge.vertices[direction.other] = v;
         if ((vertex = Vertex.intersect(llbnd, bisector)) != null) {
           vertices.add(vertex!);
           heap.remove(llbnd);

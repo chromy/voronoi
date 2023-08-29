@@ -100,7 +100,7 @@ class VoronoiDemo {
   /// Draw the edges of the cells on context.
   void drawLines(CanvasRenderingContext2D context) {
     // Don't consider edges which have been clipped completely away.
-    final Iterable<Edge> edges = voronoi.edges.where((Edge x) => x.visible);
+    final Iterable<Edge> edges = voronoi.edges.where((Edge edge) => edge.visible);
 
     for (final Edge edge in edges) {
       // Create gradient

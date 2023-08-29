@@ -29,8 +29,8 @@ class EdgeReorderer {
     newEdges.add(edge);
     _edgeOrientations.add(Direction.left);
 
-    Object? firstPoint = (criterion == "vertex") ? edge.leftVertex : edge.leftSite;
-    Object? lastPoint = (criterion == "vertex") ? edge.rightVertex : edge.rightSite;
+    Object? firstPoint = (criterion == "vertex") ? edge.vertices[Direction.left] : edge.leftSite;
+    Object? lastPoint = (criterion == "vertex") ? edge.vertices[Direction.right] : edge.rightSite;
 
     if (firstPoint == Vertex.vertexAtInfinity ||
         lastPoint == Vertex.vertexAtInfinity) {
@@ -47,9 +47,9 @@ class EdgeReorderer {
         }
         edge = origEdges[i];
         final Object? leftPoint =
-            (criterion == "vertex") ? edge.leftVertex : edge.leftSite;
+            (criterion == "vertex") ? edge.vertices[Direction.left] : edge.leftSite;
         final Object? rightPoint =
-            (criterion == "vertex") ? edge.rightVertex : edge.rightSite;
+            (criterion == "vertex") ? edge.vertices[Direction.right] : edge.rightSite;
         if (leftPoint == Vertex.vertexAtInfinity ||
             rightPoint == Vertex.vertexAtInfinity) {
           return <Edge>[];
