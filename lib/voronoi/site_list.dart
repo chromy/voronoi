@@ -1,28 +1,38 @@
 part of voronoi;
 
-class SiteList {
-  final List<Site<num>> _sites = <Site<num>>[];
-  List<Site<num>> get sites => _sites;
+class SiteList<T extends num> extends ListBase<Site<T>> {
+  final List<Site<T>> _sites = <Site<T>>[];
   int _currentIndex = 0;
 
   bool _sorted = false;
 
   SiteList();
 
-  void add(Site<num> site) {
+  @override
+  void add(Site<T> element) {
     _sorted = false;
-    _sites.add(site);
+    _sites.add(element);
   }
 
+  @override
   int get length => _sites.length;
 
-  Site<num>? next() {
+  @override
+  set length(int newLength) => _sites.length = newLength;
+
+  @override
+  Site<T> operator [](int index) => _sites[index];
+
+  @override
+  void operator []=(int index, Site<T> value) => _sites[index] = value;
+
+  Site<T>? next() {
     if (!_sorted) {
       //"SiteList::next():  sites have not been sorted"
       throw Error();
     }
-    if (_currentIndex < _sites.length) {
-      return _sites[_currentIndex++];
+    if (_currentIndex < length) {
+      return this[_currentIndex++];
     } else {
       return null;
     }
@@ -30,54 +40,40 @@ class SiteList {
 
   Rectangle<num> getSitesBounds() {
     if (!_sorted) {
-      Site.sortSites(_sites);
+      Site.sortSites(this);
       _currentIndex = 0;
       _sorted = true;
     }
-    num xmin, xmax, ymin, ymax;
-    if (_sites.isEmpty) {
+    num xMin, xMax, yMin, yMax;
+    if (isEmpty) {
       return const Rectangle<int>(0, 0, 0, 0);
     }
-    xmin = double.maxFinite;
-    xmax = double.negativeInfinity;
-    for (final Site<num> site in _sites) {
-      if (site.x < xmin) {
-        xmin = site.x;
+    xMin = double.maxFinite;
+    xMax = double.negativeInfinity;
+    for (final Site<T> site in this) {
+      if (site.x < xMin) {
+        xMin = site.x;
       }
-      if (site.x > xmax) {
-        xmax = site.x;
+      if (site.x > xMax) {
+        xMax = site.x;
       }
     }
     // here's where we assume that the sites have been sorted on y:
-    ymin = _sites[0].y;
-    ymax = _sites[_sites.length - 1].y;
+    yMin = this[0].y;
+    yMax = this[length - 1].y;
 
-    return Rectangle<num>(xmin, ymin, xmax - xmin, ymax - ymin);
+    return Rectangle<num>(xMin, yMin, xMax - xMin, yMax - yMin);
   }
 
-  ///
   /// @return the largest circle centered at each site that fits in its region;
-  /// if the region is infinite, return a circle of radius 0.
-  ///
-  List<Circle> circles() {
-    final List<Circle> circles = <Circle>[];
-    for (final Site<num> site in _sites) {
-      num radius = 0;
+  /// if the region is infinite, return no circle for that region.
+  Iterable<Circle> circles() => map((Site<T> site) {
       final Edge nearestEdge = site.nearestEdge();
-
       if (!nearestEdge.isPartOfConvexHull()) {
-        radius = nearestEdge.sitesDistance() * 0.5;
+        final num radius = nearestEdge.sitesDistance() * 0.5;
+        return Circle(site, radius);
       }
-      circles.add(Circle(site, radius));
-    }
-    return circles;
-  }
+  }).whereType<Circle>();
 
-  List<List<Point<num>>> regions(Rectangle<num> plotBounds) {
-    final List<List<Point<num>>> regions = <List<Point<num>>>[];
-    for (final Site<num> site in _sites) {
-      regions.add(site.region(plotBounds));
-    }
-    return regions;
-  }
+  Iterable<List<Point<num>>> regions(Rectangle<num> plotBounds) => map((Site<T> site) => site.region(plotBounds));
 }

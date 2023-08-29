@@ -48,8 +48,8 @@ part 'voronoi/halfedge_priority_queue.dart';
 class BitmapData {}
 
 class Voronoi {
-  final SiteList _sites = SiteList();
-  SiteList get sites => _sites;
+  final SiteList<num> _sites = SiteList<num>();
+  List<Site<num>> get sites => _sites.toList();
   final Map<Point<num>, Site<num>> _sitesIndexedByLocation = <Point<num>, Site<num>>{};
 
   final List<Edge> _edges = <Edge>[];
@@ -105,7 +105,7 @@ class Voronoi {
     return points;
   }
 
-  List<Circle> circles() => _sites.circles();
+  Iterable<Circle> circles() => _sites.circles();
 
   Iterable<LineSegment> voronoiBoundaryForSite(Point<num> coord) =>
       visibleLineSegments(selectEdgesForSitePoint(coord, _edges));
@@ -158,7 +158,7 @@ class Voronoi {
     return points;
   }
 
-  List<List<Point<num>>> regions() => _sites.regions(_plotBounds);
+  Iterable<List<Point<num>>> regions() => _sites.regions(_plotBounds);
 
   void fortunesAlgorithm() {
     Site<num>? newSite, bottomSite, topSite, tempSite;
