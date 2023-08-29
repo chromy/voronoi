@@ -163,7 +163,7 @@ class Voronoi {
 
   void fortunesAlgorithm() {
     Site? newSite, bottomSite, topSite, tempSite;
-    Vertex? v, vertex;
+    Vertex<num>? v, vertex;
     Point<num>? newintstar;
     Direction leftRight;
     Halfedge lbnd, rbnd, llbnd, rrbnd, bisector;
@@ -175,7 +175,7 @@ class Voronoi {
     final HalfedgePriorityQueue heap = HalfedgePriorityQueue(dataBounds.left, dataBounds.height, sqrtNSites);
     final EdgeList edgeList = EdgeList(dataBounds.left, dataBounds.width, sqrtNSites);
     final List<Halfedge> halfEdges = <Halfedge>[];
-    final List<Vertex> vertices = <Vertex>[];
+    final List<Vertex<num>> vertices = <Vertex<num>>[];
 
     final Site? bottomMostSite = _sites.next();
     newSite = _sites.next();
@@ -227,7 +227,7 @@ class Voronoi {
           heap.remove(lbnd);
           lbnd
             ..vertex = vertex
-            ..ystar = vertex.y + newSite.dist(vertex.coord);
+            ..ystar = vertex.y + newSite.dist(vertex);
           heap.insert(lbnd);
         }
 
@@ -243,7 +243,7 @@ class Voronoi {
           vertices.add(vertex!);
           bisector
             ..vertex = vertex
-            ..ystar = vertex.y + newSite.dist(vertex.coord);
+            ..ystar = vertex.y + newSite.dist(vertex);
           heap.insert(bisector);
         }
 
@@ -284,14 +284,14 @@ class Voronoi {
           heap.remove(llbnd);
           llbnd
             ..vertex = vertex
-            ..ystar = vertex.y + bottomSite.dist(vertex.coord);
+            ..ystar = vertex.y + bottomSite.dist(vertex);
           heap.insert(llbnd);
         }
         if ((vertex = Vertex.intersect(bisector, rrbnd)) != null) {
           vertices.add(vertex!);
           bisector
             ..vertex = vertex
-            ..ystar = vertex.y + bottomSite.dist(vertex.coord);
+            ..ystar = vertex.y + bottomSite.dist(vertex);
           heap.insert(bisector);
         }
       } else {

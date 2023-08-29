@@ -1,49 +1,34 @@
 part of voronoi;
 
-class Vertex {
-  static int _nvertices = 0;
+class Vertex<T extends num> extends Point<T> {
+  static final Vertex<double> vertexAtInfinity = Vertex<double>(double.nan, double.nan);
+  static int _vertexCount = 0;
 
-  static final Vertex vertexAtInfinity = Vertex(double.nan, double.nan);
-  // TODO: make x and y unsetable
-  // TODO: fix coord/vertex
-  num x, y;
-  late Point<num> coord;
   int _vertexIndex = 0;
 
-  Vertex(this.x, this.y) {
-    coord = Point<num>(x, y);
-  }
+  Vertex(super.x, super.y);
 
-  factory Vertex.create(num x, num y) {
+  static Vertex<num> create<T extends num>(T x, T y) {
     if (x.isNaN || y.isNaN) {
       return vertexAtInfinity;
     }
-    return Vertex(x, y);
+
+    return Vertex<T>(x, y);
   }
 
   @override
   String toString() => "Vertex($x, $y)";
 
-  /// This is the only way to make a Vertex
-  ///
-  /// @param halfedge0
-  /// @param halfedge1
-  /// @return
-  ///
-  static Vertex? intersect(Halfedge halfedge0, Halfedge halfedge1) {
+  static Vertex<num>? intersect(Halfedge halfEdge0, Halfedge halfEdge1) {
     Edge? edge0, edge1, edge;
-    Halfedge halfedge;
+    Halfedge halfEdge;
     num determinant, intersectionX, intersectionY;
     bool rightOfSite;
 
-    edge0 = halfedge0.edge;
-    edge1 = halfedge1.edge;
+    edge0 = halfEdge0.edge;
+    edge1 = halfEdge1.edge;
 
-    if (edge0 == null || edge1 == null) {
-      return null;
-    }
-
-    if (edge0.rightSite == edge1.rightSite) {
+    if (edge0 == null || edge1 == null || edge0.rightSite == edge1.rightSite) {
       return null;
     }
 
@@ -57,15 +42,15 @@ class Vertex {
     intersectionY = (edge1.c * edge0.a - edge0.c * edge1.a) / determinant;
 
     if (Voronoi.compareByYThenX(edge0.rightSite, edge1.rightSite.coord) < 0) {
-      halfedge = halfedge0;
+      halfEdge = halfEdge0;
       edge = edge0;
     } else {
-      halfedge = halfedge1;
+      halfEdge = halfEdge1;
       edge = edge1;
     }
     rightOfSite = intersectionX >= edge.rightSite.x;
-    if ((rightOfSite && halfedge.leftRight == Direction.left) ||
-        (!rightOfSite && halfedge.leftRight == Direction.right)) {
+    if ((rightOfSite && halfEdge.leftRight == Direction.left) ||
+        (!rightOfSite && halfEdge.leftRight == Direction.right)) {
       return null;
     }
 
@@ -74,7 +59,5 @@ class Vertex {
 
   int get vertexIndex => _vertexIndex;
 
-  void setIndex() {
-    _vertexIndex = _nvertices++;
-  }
+  void setIndex() => _vertexIndex = _vertexCount++;
 }

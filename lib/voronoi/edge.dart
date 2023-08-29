@@ -11,8 +11,8 @@ class Edge {
 
   // the two Voronoi vertices that the edge connects
   //    (if one of them is null, the edge extends to infinity)
-  late Vertex? leftVertex;
-  late Vertex? rightVertex;
+  late Vertex<num>? leftVertex;
+  late Vertex<num>? rightVertex;
 
   Point<num>? get leftClippedEnd => _clippedVertices?[Direction.left];
 
@@ -80,9 +80,9 @@ class Edge {
     }
   }
 
-  Vertex? vertex(Direction leftRight) => (leftRight == Direction.left) ? leftVertex : rightVertex;
+  Vertex<num>? vertex(Direction leftRight) => (leftRight == Direction.left) ? leftVertex : rightVertex;
 
-  void setVertex(Direction leftRight, Vertex v) {
+  void setVertex(Direction leftRight, Vertex<num> v) {
     if (leftRight == Direction.left) {
       leftVertex = v;
     } else {
@@ -121,7 +121,7 @@ class Edge {
     final num xmax = bounds.right;
     final num ymax = bounds.bottom;
 
-    Vertex? vertex0, vertex1;
+    Vertex<num>? vertex0, vertex1;
     num x0, x1, y0, y1;
 
     if (a == 1.0 && b >= 0.0) {
