@@ -218,7 +218,7 @@ class Voronoi {
         halfEdges.add(bisector);
         // inserting two Halfedges into edgeList constitutes Step 10:
         // insert bisector to the right of lbnd:
-        edgeList.insert(lbnd, bisector);
+        edgeList.insertToRightOfHalfEdge(lbnd, bisector);
 
         // first half of Step 11:
         if ((vertex = Vertex.intersect(bisector, lbnd)) != null) {
@@ -235,7 +235,7 @@ class Voronoi {
         halfEdges.add(bisector);
         // second Halfedge for Step 10:
         // insert bisector to the right of lbnd:
-        edgeList.insert(lbnd, bisector);
+        edgeList.insertToRightOfHalfEdge(lbnd, bisector);
 
         // second half of Step 11:
         if ((vertex = Vertex.intersect(bisector, rbnd)) != null) {
@@ -276,7 +276,7 @@ class Voronoi {
         _edges.add(edge);
         bisector = Halfedge(edge, leftRight);
         halfEdges.add(bisector);
-        edgeList.insert(llbnd, bisector);
+        edgeList.insertToRightOfHalfEdge(llbnd, bisector);
         edge.setVertex(leftRight.other, v);
         if ((vertex = Vertex.intersect(llbnd, bisector)) != null) {
           vertices.add(vertex!);
