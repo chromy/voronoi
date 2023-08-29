@@ -10,12 +10,12 @@ class Polygon {
   Winding get winding {
     num theSignedDoubleArea = signedDoubleArea();
     if (theSignedDoubleArea < 0) {
-      return Winding.CLOCKWISE;
+      return Winding.clockwise;
     }
     if (theSignedDoubleArea > 0) {
-      return Winding.COUNTERCLOCKWISE;
+      return Winding.counterclockwise;
     }
-    return Winding.NONE;
+    return Winding.none;
   }
 
   num signedDoubleArea() {

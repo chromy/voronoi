@@ -68,7 +68,7 @@ class Site {
     if (_edgeOrientations == null) {
       reorderEdges();
       _region = clipToBounds(clippingBounds);
-      if (Polygon(_region!).winding == Winding.CLOCKWISE) {
+      if (Polygon(_region!).winding == Winding.clockwise) {
         _region = List.from(_region!.reversed);
       }
     }

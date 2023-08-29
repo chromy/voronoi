@@ -11,7 +11,7 @@ main() {
     expect(bigSquare.area, equals(25));
   });
   test('polygons have winding', () {
-    expect(smallSquare.winding, equals(Winding.COUNTERCLOCKWISE));
-    expect(bigSquare.winding, equals(Winding.CLOCKWISE));
+    expect(smallSquare.winding, equals(Winding.counterclockwise));
+    expect(bigSquare.winding, equals(Winding.clockwise));
   });
 }
