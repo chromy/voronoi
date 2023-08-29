@@ -1,7 +1,7 @@
 part of voronoi;
 
 class SiteList {
-  List<Site> _sites = [];
+  final List<Site> _sites = <Site>[];
   int _currentIndex = 0;
 
   bool _sorted = false;
@@ -27,19 +27,19 @@ class SiteList {
     }
   }
 
-  Rectangle getSitesBounds() {
+  Rectangle<num> getSitesBounds() {
     if (!_sorted) {
       Site.sortSites(_sites);
       _currentIndex = 0;
       _sorted = true;
     }
     num xmin, xmax, ymin, ymax;
-    if (_sites.length == 0) {
-      return Rectangle(0, 0, 0, 0);
+    if (_sites.isEmpty) {
+      return const Rectangle<int>(0, 0, 0, 0);
     }
     xmin = double.maxFinite;
     xmax = double.negativeInfinity;
-    for (Site site in _sites) {
+    for (final Site site in _sites) {
       if (site.x < xmin) {
         xmin = site.x;
       }
@@ -51,12 +51,12 @@ class SiteList {
     ymin = _sites[0].y;
     ymax = _sites[_sites.length - 1].y;
 
-    return Rectangle(xmin, ymin, xmax - xmin, ymax - ymin);
+    return Rectangle<num>(xmin, ymin, xmax - xmin, ymax - ymin);
   }
 
-  List<Point> siteCoords() {
-    List<Point> coords = [];
-    for (Site site in _sites) {
+  List<Point<num>> siteCoords() {
+    final List<Point<num>> coords = <Point<num>>[];
+    for (final Site site in _sites) {
       coords.add(site.coord);
     }
     return coords;
@@ -67,10 +67,10 @@ class SiteList {
   /// if the region is infinite, return a circle of radius 0.
   ///
   List<Circle> circles() {
-    List<Circle> circles = [];
-    for (Site site in _sites) {
+    final List<Circle> circles = <Circle>[];
+    for (final Site site in _sites) {
       num radius = 0;
-      Edge nearestEdge = site.nearestEdge();
+      final Edge nearestEdge = site.nearestEdge();
 
       if (!nearestEdge.isPartOfConvexHull()) {
         radius = nearestEdge.sitesDistance() * 0.5;
@@ -80,9 +80,9 @@ class SiteList {
     return circles;
   }
 
-  List<List<Point>> regions(Rectangle plotBounds) {
-    List<List<Point>> regions = [];
-    for (Site site in _sites) {
+  List<List<Point<num>>> regions(Rectangle<num> plotBounds) {
+    final List<List<Point<num>>> regions = <List<Point<num>>>[];
+    for (final Site site in _sites) {
       regions.add(site.region(plotBounds));
     }
     return regions;

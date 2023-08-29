@@ -1,10 +1,10 @@
 part of voronoi;
 
 class Site {
-  static const num EPSILON = 0.005;
+  static const num epsilon = 0.005;
 
-  Point _coord;
-  Point get coord => _coord;
+  final Point<num> _coord;
+  Point<num> get coord => _coord;
   num get x => _coord.x;
   num get y => _coord.y;
 
@@ -14,14 +14,14 @@ class Site {
   int _siteIndex;
 
   // the edges that define this Site's Voronoi region:
-  List<Edge> _edges = [];
+  List<Edge> _edges = <Edge>[];
   List<Edge> get edges => _edges;
 
   // which end of each edge hooks up with the previous edge in _edges:
-  List<LR>? _edgeOrientations;
+  List<Direction>? _edgeOrientations;
 
   // ordered list of points that define the region clipped to bounds:
-  List<Point>? _region;
+  List<Point<num>>? _region;
 
   Site(this._coord, this._siteIndex, this.weight, this.color);
 
@@ -36,12 +36,12 @@ class Site {
 
   List<Site> neighborSites() {
     if (_edges.isEmpty) {
-      return [];
+      return <Site>[];
     }
     if (_edgeOrientations == null) {
       reorderEdges();
     }
-    List<Site> list = [];
+    final List<Site> list = <Site>[];
     Edge edge;
     for (edge in _edges) {
       if (neighborSite(edge) != null) {
@@ -61,29 +61,29 @@ class Site {
     return null;
   }
 
-  List<Point> region(Rectangle clippingBounds) {
+  List<Point<num>> region(Rectangle<num> clippingBounds) {
     if (_edges.isEmpty) {
-      return [];
+      return <Point<num>>[];
     }
     if (_edgeOrientations == null) {
       reorderEdges();
       _region = clipToBounds(clippingBounds);
       if (Polygon(_region!).winding == Winding.clockwise) {
-        _region = List.from(_region!.reversed);
+        _region = List<Point<num>>.from(_region!.reversed);
       }
     }
     return _region!;
   }
 
   void reorderEdges() {
-    EdgeReorderer reorderer = EdgeReorderer(_edges, "vertex");
+    final EdgeReorderer reorderer = EdgeReorderer(_edges, "vertex");
     _edges = reorderer.edges;
     _edgeOrientations = reorderer.edgeOrientations;
   }
 
-  List<Point> clipToBounds(Rectangle bounds) {
-    List<Point> points = [];
-    int n = _edges.length;
+  List<Point<num>> clipToBounds(Rectangle<num> bounds) {
+    final List<Point<num>> points = <Point<num>>[];
+    final int n = _edges.length;
     int i = 0;
     Edge edge;
     while (i < n && !_edges[i].visible) {
@@ -92,12 +92,12 @@ class Site {
 
     if (i == n) {
       // no edges visible
-      return [];
+      return <Point<num>>[];
     }
     edge = _edges[i];
-    LR orientation = _edgeOrientations![i];
-    points.add(edge.clippedEnds![orientation]);
-    points.add(edge.clippedEnds![orientation.other]);
+    final Direction orientation = _edgeOrientations![i];
+    points..add(edge.clippedEnds![orientation]!)
+    ..add(edge.clippedEnds![orientation.other]!);
 
     for (int j = i + 1; j < n; ++j) {
       edge = _edges[j];
@@ -112,13 +112,13 @@ class Site {
     return points;
   }
 
-  void connect(List<Point> points, int j, Rectangle bounds,
+  void connect(List<Point<num>> points, int j, Rectangle<num> bounds,
       {bool closingUp = false}) {
-    Point rightPoint = points[points.length - 1];
-    Edge newEdge = _edges[j];
-    LR newOrientation = _edgeOrientations![j];
+    final Point<num> rightPoint = points[points.length - 1];
+    final Edge newEdge = _edges[j];
+    final Direction newOrientation = _edgeOrientations![j];
     // the point that  must be connected to rightPoint:
-    Point newPoint = newEdge.clippedEnds![newOrientation];
+    final Point<num> newPoint = newEdge.clippedEnds![newOrientation]!;
     if (!closeEnough(rightPoint, newPoint)) {
       // The points do not coincide, so they must have been clipped at the bounds;
       // see if they are on the same border of the bounds:
@@ -128,80 +128,80 @@ class Site {
         // (NOTE this will not be correct if the region should take up more than
         // half of the bounds rect, for then we will have gone the wrong way
         // around the bounds and included the smaller part rather than the larger)
-        int rightCheck = BoundsCheck.check(rightPoint, bounds);
-        int newCheck = BoundsCheck.check(newPoint, bounds);
+        final int rightCheck = BoundsCheck.check(rightPoint, bounds);
+        final int newCheck = BoundsCheck.check(newPoint, bounds);
         num px, py;
-        if (rightCheck & BoundsCheck.RIGHT != 0) {
+        if (rightCheck & BoundsCheck.right != 0) {
           px = bounds.right;
-          if (newCheck & BoundsCheck.BOTTOM != 0) {
+          if (newCheck & BoundsCheck.bottom != 0) {
             py = bounds.bottom;
-            points.add(Point(px, py));
-          } else if (newCheck & BoundsCheck.TOP != 0) {
+            points.add(Point<num>(px, py));
+          } else if (newCheck & BoundsCheck.top != 0) {
             py = bounds.top;
-            points.add(Point(px, py));
-          } else if (newCheck & BoundsCheck.LEFT != 0) {
+            points.add(Point<num>(px, py));
+          } else if (newCheck & BoundsCheck.left != 0) {
             if (rightPoint.y - bounds.top + newPoint.y - bounds.top <
                 bounds.height) {
               py = bounds.top;
             } else {
               py = bounds.bottom;
             }
-            points.add(Point(px, py));
-            points.add(Point(bounds.left, py));
+            points..add(Point<num>(px, py))
+            ..add(Point<num>(bounds.left, py));
           }
-        } else if (rightCheck & BoundsCheck.LEFT != 0) {
+        } else if (rightCheck & BoundsCheck.left != 0) {
           px = bounds.left;
-          if (newCheck & BoundsCheck.BOTTOM != 0) {
+          if (newCheck & BoundsCheck.bottom != 0) {
             py = bounds.bottom;
-            points.add(Point(px, py));
-          } else if (newCheck & BoundsCheck.TOP != 0) {
+            points.add(Point<num>(px, py));
+          } else if (newCheck & BoundsCheck.top != 0) {
             py = bounds.top;
-            points.add(Point(px, py));
-          } else if (newCheck & BoundsCheck.RIGHT != 0) {
+            points.add(Point<num>(px, py));
+          } else if (newCheck & BoundsCheck.right != 0) {
             if (rightPoint.y - bounds.top + newPoint.y - bounds.top <
                 bounds.height) {
               py = bounds.top;
             } else {
               py = bounds.bottom;
             }
-            points.add(Point(px, py));
-            points.add(Point(bounds.right, py));
+            points..add(Point<num>(px, py))
+            ..add(Point<num>(bounds.right, py));
           }
-        } else if (rightCheck & BoundsCheck.TOP != 0) {
+        } else if (rightCheck & BoundsCheck.top != 0) {
           py = bounds.top;
-          if (newCheck & BoundsCheck.RIGHT != 0) {
+          if (newCheck & BoundsCheck.right != 0) {
             px = bounds.right;
-            points.add(Point(px, py));
-          } else if (newCheck & BoundsCheck.LEFT != 0) {
+            points.add(Point<num>(px, py));
+          } else if (newCheck & BoundsCheck.left != 0) {
             px = bounds.left;
-            points.add(Point(px, py));
-          } else if (newCheck & BoundsCheck.BOTTOM != 0) {
+            points.add(Point<num>(px, py));
+          } else if (newCheck & BoundsCheck.bottom != 0) {
             if (rightPoint.x - bounds.top + newPoint.x - bounds.top <
                 bounds.width) {
               px = bounds.left;
             } else {
               px = bounds.right;
             }
-            points.add(Point(px, py));
-            points.add(Point(px, bounds.bottom));
+            points..add(Point<num>(px, py))
+            ..add(Point<num>(px, bounds.bottom));
           }
-        } else if (rightCheck & BoundsCheck.BOTTOM != 0) {
+        } else if (rightCheck & BoundsCheck.bottom != 0) {
           py = bounds.bottom;
-          if (newCheck & BoundsCheck.RIGHT != 0) {
+          if (newCheck & BoundsCheck.right != 0) {
             px = bounds.right;
-            points.add(Point(px, py));
-          } else if (newCheck & BoundsCheck.LEFT != 0) {
+            points.add(Point<num>(px, py));
+          } else if (newCheck & BoundsCheck.left != 0) {
             px = bounds.left;
-            points.add(Point(px, py));
-          } else if (newCheck & BoundsCheck.TOP != 0) {
+            points.add(Point<num>(px, py));
+          } else if (newCheck & BoundsCheck.top != 0) {
             if (rightPoint.x - bounds.top + newPoint.x - bounds.top <
                 bounds.width) {
               px = bounds.left;
             } else {
               px = bounds.right;
             }
-            points.add(Point(px, py));
-            points.add(Point(px, bounds.top));
+            points..add(Point<num>(px, py))
+            ..add(Point<num>(px, bounds.top));
           }
         }
       }
@@ -211,23 +211,17 @@ class Site {
       }
       points.add(newPoint);
     }
-    Point newRightPoint = newEdge.clippedEnds![newOrientation.other];
+    final Point<num> newRightPoint = newEdge.clippedEnds![newOrientation.other]!;
     if (!closeEnough(points[0], newRightPoint)) {
       points.add(newRightPoint);
     }
   }
 
-  num dist(Point p) {
-    return _coord.distanceTo(p);
-  }
+  num dist(Point<num> p) => _coord.distanceTo(p);
 
-  static bool closeEnough(Point p0, Point p1) {
-    return p0.distanceTo(p1) < EPSILON;
-  }
+  static bool closeEnough(Point<num> p0, Point<num> p1) => p0.distanceTo(p1) < epsilon;
 
-  static void sortSites(List<Site> sites) {
-    sites.sort(Site.compare);
-  }
+  static void sortSites(List<Site> sites) => sites.sort(Site.compare);
 
   /// sort sites on y, then x, coord
   /// also change each site's _siteIndex to match its new position in the list
@@ -236,7 +230,7 @@ class Site {
   /// haha "also" - means more than one responsibility...
   ///
   static int compare(Site s1, Site s2) {
-    int returnValue = Voronoi.compareByYThenX(s1, s2);
+    final int returnValue = Voronoi.compareByYThenX(s1, s2.coord);
 
     // swap _siteIndex values if necessary to match new ordering:
     int tempIndex;
@@ -258,29 +252,29 @@ class Site {
 }
 
 class BoundsCheck {
-  static const TOP = 1;
-  static const BOTTOM = 2;
-  static const LEFT = 4;
-  static const RIGHT = 8;
+  static const int top = 1;
+  static const int bottom = 2;
+  static const int left = 4;
+  static const int right = 8;
 
   ///
   /// @param point
   /// @param bounds
   /// @return an int with the appropriate bits set if the Point lies on the corresponding bounds lines
   ///
-  static int check(Point point, Rectangle bounds) {
+  static int check(Point<num> point, Rectangle<num> bounds) {
     int value = 0;
     if (point.x == bounds.left) {
-      value |= LEFT;
+      value |= left;
     }
     if (point.x == bounds.right) {
-      value |= RIGHT;
+      value |= right;
     }
     if (point.y == bounds.top) {
-      value |= TOP;
+      value |= top;
     }
     if (point.y == bounds.bottom) {
-      value |= BOTTOM;
+      value |= bottom;
     }
     return value;
   }

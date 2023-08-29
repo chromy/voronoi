@@ -2,17 +2,17 @@ part of voronoi;
 
 // also known as heap
 class HalfedgePriorityQueue {
-  List<Halfedge> _hash = [];
+  List<Halfedge> _hash = <Halfedge>[];
   int _count = 0;
   int _minBucket = 0;
   late int _hashsize;
 
-  num _ymin;
-  num _deltay;
+  final num _ymin;
+  final num _deltay;
 
-  HalfedgePriorityQueue(this._ymin, num this._deltay, int sqrt_nsites) {
-    _hashsize = 4 * sqrt_nsites;
-    _hash = List.filled(_hashsize, Halfedge.createDummy());
+  HalfedgePriorityQueue(this._ymin, this._deltay, int sqrtNSites) {
+    _hashsize = 4 * sqrtNSites;
+    _hash = List<Halfedge>.filled(_hashsize, Halfedge.createDummy());
   }
 
   /*
@@ -30,7 +30,7 @@ class HalfedgePriorityQueue {
 
   void insert(Halfedge halfEdge) {
     Halfedge? previous, next;
-    int insertionBucket = bucket(halfEdge);
+    final int insertionBucket = bucket(halfEdge);
     if (insertionBucket < _minBucket) {
       _minBucket = insertionBucket;
     }
@@ -48,7 +48,7 @@ class HalfedgePriorityQueue {
 
   void remove(Halfedge halfEdge) {
     Halfedge previous;
-    int removalBucket = bucket(halfEdge);
+    final int removalBucket = bucket(halfEdge);
 
     if (halfEdge.vertex != null) {
       previous = _hash[removalBucket];
@@ -57,22 +57,24 @@ class HalfedgePriorityQueue {
       }
       previous.nextInPriorityQueue = halfEdge.nextInPriorityQueue;
       _count--;
-      halfEdge.vertex = null;
-      halfEdge.nextInPriorityQueue = null;
+      halfEdge..vertex = null
+      ..nextInPriorityQueue = null;
       //halfEdge.dispose();
     }
   }
 
   int bucket(Halfedge halfEdge) {
     int theBucket = ((halfEdge.ystar - _ymin) / _deltay * _hashsize).round();
-    if (theBucket < 0) theBucket = 0;
-    if (theBucket >= _hashsize) theBucket = _hashsize - 1;
+    if (theBucket < 0) {
+      theBucket = 0;
+    }
+    if (theBucket >= _hashsize) {
+      theBucket = _hashsize - 1;
+    }
     return theBucket;
   }
 
-  bool isEmpty(int bucket) {
-    return (_hash[bucket].nextInPriorityQueue == null);
-  }
+  bool isEmpty(int bucket) => _hash[bucket].nextInPriorityQueue == null;
 
   /// move _minBucket until it contains an actual Halfedge (not just the dummy at the top);
   ///
@@ -82,16 +84,14 @@ class HalfedgePriorityQueue {
     }
   }
 
-  bool empty() {
-    return _count == 0;
-  }
+  bool empty() => _count == 0;
 
   /// @return coordinates of the Halfedge's vertex in V*, the transformed Voronoi diagram
   ///
-  Point min() {
+  Point<num> min() {
     adjustMinBucket();
-    Halfedge? answer = _hash[_minBucket].nextInPriorityQueue;
-    return Point(answer!.vertex!.x, answer.ystar);
+    final Halfedge? answer = _hash[_minBucket].nextInPriorityQueue;
+    return Point<num>(answer!.vertex!.x, answer.ystar);
   }
 
   /// remove and return the min Halfedge

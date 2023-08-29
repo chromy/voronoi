@@ -2,10 +2,10 @@ import 'dart:math';
 import 'package:test/test.dart';
 import 'package:voronoi/voronoi.dart';
 
-main() {
-  var smallSquare =
-      Polygon([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)]);
-  var bigSquare = Polygon([Point(0, 0), Point(0, 5), Point(5, 5), Point(5, 0)]);
+void main() {
+  final Polygon smallSquare =
+      Polygon(<Point<int>>[const Point<int>(0, 0), const Point<int>(1, 0), const Point<int>(1, 1), const Point<int>(0, 1)]);
+  final Polygon bigSquare = Polygon(<Point<int>>[const Point<int>(0, 0), const Point<int>(0, 5), const Point<int>(5, 5), const Point<int>(5, 0)]);
   test('polygons have area', () {
     expect(smallSquare.area, equals(1));
     expect(bigSquare.area, equals(25));

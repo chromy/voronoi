@@ -2,7 +2,7 @@ part of voronoi;
 
 class EdgeList {
   num _deltax;
-  num _xmin;
+  final num _xmin;
 
   late int _hashsize;
   late List<Halfedge?> _hash;
@@ -13,20 +13,20 @@ class EdgeList {
 
   Halfedge get rightEnd => _rightEnd;
 
-  EdgeList(this._xmin, this._deltax, int sqrt_nsites) {
+  EdgeList(this._xmin, this._deltax, int sqrtNSites) {
     // TODO: fix hack
     _deltax = _deltax == 0 ? 1 : _deltax;
-    _hashsize = 2 * sqrt_nsites;
+    _hashsize = 2 * sqrtNSites;
 
-    _hash = List.filled(_hashsize, null);
+    _hash = List<Halfedge?>.filled(_hashsize, null);
 
     // two dummy Halfedges:
     _leftEnd = Halfedge.createDummy();
     _rightEnd = Halfedge.createDummy();
-    _leftEnd.edgeListLeftNeighbor = null;
-    _leftEnd.edgeListRightNeighbor = _rightEnd;
-    _rightEnd.edgeListLeftNeighbor = _leftEnd;
-    _rightEnd.edgeListRightNeighbor = null;
+    _leftEnd..edgeListLeftNeighbor = null
+    ..edgeListRightNeighbor = _rightEnd;
+    _rightEnd..edgeListLeftNeighbor = _leftEnd
+    ..edgeListRightNeighbor = null;
     _hash[0] = _leftEnd;
     _hash[_hashsize - 1] = _rightEnd;
   }
@@ -36,8 +36,8 @@ class EdgeList {
   /// @param newHalfedge
   ///
   void insert(Halfedge lb, Halfedge newHalfedge) {
-    newHalfedge.edgeListLeftNeighbor = lb;
-    newHalfedge.edgeListRightNeighbor = lb.edgeListRightNeighbor;
+    newHalfedge..edgeListLeftNeighbor = lb
+    ..edgeListRightNeighbor = lb.edgeListRightNeighbor;
     lb.edgeListRightNeighbor!.edgeListLeftNeighbor = newHalfedge;
     lb.edgeListRightNeighbor = newHalfedge;
   }
@@ -49,8 +49,8 @@ class EdgeList {
   void remove(Halfedge halfEdge) {
     halfEdge.edgeListLeftNeighbor!.edgeListRightNeighbor = halfEdge.edgeListRightNeighbor;
     halfEdge.edgeListRightNeighbor!.edgeListLeftNeighbor = halfEdge.edgeListLeftNeighbor;
-    halfEdge.edge = Edge.DELETED;
-    halfEdge.edgeListLeftNeighbor = halfEdge.edgeListRightNeighbor = null;
+    halfEdge..edge = Edge.deleted
+    ..edgeListLeftNeighbor = halfEdge.edgeListRightNeighbor = null;
   }
 
   /// Find the rightmost Halfedge that is still left of p
@@ -71,9 +71,13 @@ class EdgeList {
     }
     halfEdge = getHash(bucket);
     if (halfEdge == null) {
-      for (int i = 1; true; ++i) {
-        if ((halfEdge = getHash(bucket - i)) != null) break;
-        if ((halfEdge = getHash(bucket + i)) != null) break;
+      for (int i = 1; i<_hashsize; ++i) {
+        if ((halfEdge = getHash(bucket - i)) != null) {
+          break;
+        }
+        if ((halfEdge = getHash(bucket + i)) != null) {
+          break;
+        }
       }
     }
 
@@ -104,7 +108,7 @@ class EdgeList {
       return null;
     }
     halfEdge = _hash[b];
-    if (halfEdge != null && halfEdge.edge == Edge.DELETED) {
+    if (halfEdge != null && halfEdge.edge == Edge.deleted) {
       /* Hash table points to deleted halfedge.  Patch as necessary. */
       _hash[b] = null;
       // still can't dispose halfEdge yet!

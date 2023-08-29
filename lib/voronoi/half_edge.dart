@@ -6,7 +6,7 @@ class Halfedge {
   Halfedge? nextInPriorityQueue;
 
   Edge? edge;
-  LR? leftRight;
+  Direction? leftRight;
   Vertex? vertex;
 
   // the vertex's y-coordinate in the transformed Voronoi space V*
@@ -14,13 +14,10 @@ class Halfedge {
 
   Halfedge(this.edge, this.leftRight);
 
-  factory Halfedge.createDummy() {
-    return Halfedge(null, null);
-  }
+  factory Halfedge.createDummy() => Halfedge(null, null);
 
-  String toString() {
-    return "Halfedge(leftRight: $leftRight, vertex: $vertex)";
-  }
+  @override
+  String toString() => "Halfedge(leftRight: $leftRight, vertex: $vertex)";
 
   bool isLeftOf(Point<num> p) {
     if (edge == null) {
@@ -34,11 +31,11 @@ class Halfedge {
     topSite = edge!.rightSite;
     rightOfSite = p.x > topSite.x;
 
-    if (rightOfSite && this.leftRight == LR.left) {
+    if (rightOfSite && leftRight == Direction.left) {
       return true;
     }
 
-    if (!rightOfSite && this.leftRight == LR.right) {
+    if (!rightOfSite && leftRight == Direction.right) {
       return false;
     }
 
@@ -73,6 +70,6 @@ class Halfedge {
       t3 = yl - topSite.y;
       above = t1 * t1 > t2 * t2 + t3 * t3;
     }
-    return this.leftRight == LR.left ? above : !above;
+    return leftRight == Direction.left ? above : !above;
   }
 }

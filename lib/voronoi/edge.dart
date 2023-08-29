@@ -3,7 +3,7 @@ part of voronoi;
 /// The line segment connecting the two Sites is part of the Delaunay triangulation;
 /// the line segment connecting the two Vertices is part of the Voronoi diagram
 class Edge {
-  static final DELETED = Edge();
+  static final Edge deleted = Edge();
 
   // the two input Sites for which this Edge is a bisector:
   late Site leftSite;
@@ -14,13 +14,14 @@ class Edge {
   late Vertex? leftVertex;
   late Vertex? rightVertex;
 
-  Point<num>? get leftClippedEnd => _clippedVertices?[LR.left];
-  Point<num>? get rightClippedEnd => _clippedVertices?[LR.right];
+  Point<num>? get leftClippedEnd => _clippedVertices?[Direction.left];
+
+  Point<num>? get rightClippedEnd => _clippedVertices?[Direction.right];
 
   // the equation of the edge: ax + by = c
   late num a, b, c;
 
-  late Map<LR, Point>? _clippedVertices;
+  late Map<Direction, Point<num>>? _clippedVertices;
 
   Edge();
 
@@ -48,90 +49,73 @@ class Edge {
       c /= dy;
     }
 
-    Edge edge = Edge();
+    final Edge edge = Edge()
+      ..leftSite = site0
+      ..rightSite = site1
+      ..leftVertex = null
+      ..rightVertex = null
+      ..a = a
+      ..b = b
+      ..c = c
+      .._clippedVertices = null;
 
-    edge.leftSite = site0;
-    edge.rightSite = site1;
     site0.addEdge(edge);
     site1.addEdge(edge);
-
-    edge.leftVertex = null;
-    edge.rightVertex = null;
-
-    edge.a = a;
-    edge.b = b;
-    edge.c = c;
-
-    edge._clippedVertices = null;
 
     return edge;
   }
 
-  LineSegment delaunayLine() {
-    // draw a line connecting the input Sites for which the edge is a bisector:
-    return LineSegment(leftSite.coord, rightSite.coord);
-  }
+  // draw a line connecting the input Sites for which the edge is a bisector:
+  LineSegment delaunayLine() => LineSegment(leftSite.coord, rightSite.coord);
 
   LineSegment voronoiEdge() {
     if (!visible) {
       return LineSegment(null, null);
     } else {
-      return LineSegment(_clippedVertices?[LR.left], _clippedVertices?[LR.right]);
+      return LineSegment(_clippedVertices?[Direction.left], _clippedVertices?[Direction.right]);
     }
   }
 
-  Vertex? vertex(LR leftRight) {
-    return (leftRight == LR.left) ? leftVertex : rightVertex;
-  }
+  Vertex? vertex(Direction leftRight) => (leftRight == Direction.left) ? leftVertex : rightVertex;
 
-  void setVertex(LR leftRight, Vertex v) {
-    if (leftRight == LR.left) {
+  void setVertex(Direction leftRight, Vertex v) {
+    if (leftRight == Direction.left) {
       leftVertex = v;
     } else {
       rightVertex = v;
     }
   }
 
-  Site site(LR? leftRight) {
+  Site site(Direction? leftRight) {
     if (leftRight == null) {
       throw ArgumentError.notNull("leftRight");
     }
-    return (leftRight == LR.left) ? leftSite : rightSite;
+    return (leftRight == Direction.left) ? leftSite : rightSite;
   }
 
-  bool isPartOfConvexHull() {
-    return leftVertex == null || rightVertex == null;
-  }
+  bool isPartOfConvexHull() => leftVertex == null || rightVertex == null;
 
-  num sitesDistance() {
-    return leftSite.coord.distanceTo(rightSite.coord);
-  }
+  num sitesDistance() => leftSite.coord.distanceTo(rightSite.coord);
 
-  static int compareSitesDistances(Edge e1, Edge e2) {
-    return e1.sitesDistance().compareTo(e2.sitesDistance());
-  }
+  static int compareSitesDistances(Edge e1, Edge e2) => e1.sitesDistance().compareTo(e2.sitesDistance());
 
   // Once clipVertices() is called, this Dictionary will hold two Points
   // representing the clipped coordinates of the left and right ends...
-  Map? get clippedEnds {
-    return _clippedVertices;
-  }
+  Map<Direction, Point<num>>? get clippedEnds => _clippedVertices;
 
   // unless the entire Edge is outside the bounds.
   // In that case visible will be false:
-  bool get visible {
-    return _clippedVertices != null;
-  }
+  bool get visible => _clippedVertices != null;
 
   /// Set _clippedVertices to contain the two ends of the portion of the Voronoi edge that is visible
   /// within the bounds.  If no part of the Edge falls within the bounds, leave _clippedVertices null.
   /// @param bounds
   ///
-  void clipVertices(Rectangle bounds) {
-    num xmin = bounds.left;
-    num ymin = bounds.top;
-    num xmax = bounds.right;
-    num ymax = bounds.bottom;
+  void clipVertices(Rectangle<num> bounds) {
+    final num xmin = bounds.left;
+    final num ymin = bounds.top;
+    final num xmax = bounds.right;
+    final num ymax = bounds.bottom;
 
     Vertex? vertex0, vertex1;
     num x0, x1, y0, y1;
@@ -222,13 +206,13 @@ class Edge {
       }
     }
 
-    _clippedVertices = Map();
+    _clippedVertices = <Direction, Point<num>>{};
     if (vertex0 == leftVertex) {
-      _clippedVertices?[LR.left] = Point(x0, y0);
-      _clippedVertices?[LR.right] = Point(x1, y1);
+      _clippedVertices?[Direction.left] = Point<num>(x0, y0);
+      _clippedVertices?[Direction.right] = Point<num>(x1, y1);
     } else {
-      _clippedVertices?[LR.right] = Point(x0, y0);
-      _clippedVertices?[LR.left] = Point(x1, y1);
+      _clippedVertices?[Direction.right] = Point<num>(x0, y0);
+      _clippedVertices?[Direction.left] = Point<num>(x1, y1);
     }
   }
 }

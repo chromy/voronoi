@@ -3,27 +3,26 @@ part of voronoi;
 class Vertex {
   static int _nvertices = 0;
 
-  static final Vertex VERTEX_AT_INFINITY = Vertex(double.nan, double.nan);
+  static final Vertex vertexAtInfinity = Vertex(double.nan, double.nan);
   // TODO: make x and y unsetable
   // TODO: fix coord/vertex
   num x, y;
-  late Point coord;
+  late Point<num> coord;
   int _vertexIndex = 0;
 
   Vertex(this.x, this.y) {
-    coord = Point(x, y);
+    coord = Point<num>(x, y);
   }
 
   factory Vertex.create(num x, num y) {
     if (x.isNaN || y.isNaN) {
-      return VERTEX_AT_INFINITY;
+      return vertexAtInfinity;
     }
     return Vertex(x, y);
   }
 
-  String toString() {
-    return "Vertex($x, $y)";
-  }
+  @override
+  String toString() => "Vertex($x, $y)";
 
   /// This is the only way to make a Vertex
   ///
@@ -57,7 +56,7 @@ class Vertex {
     intersectionX = (edge0.c * edge1.b - edge1.c * edge0.b) / determinant;
     intersectionY = (edge1.c * edge0.a - edge0.c * edge1.a) / determinant;
 
-    if (Voronoi.compareByYThenX(edge0.rightSite, edge1.rightSite) < 0) {
+    if (Voronoi.compareByYThenX(edge0.rightSite, edge1.rightSite.coord) < 0) {
       halfedge = halfedge0;
       edge = edge0;
     } else {
@@ -65,8 +64,8 @@ class Vertex {
       edge = edge1;
     }
     rightOfSite = intersectionX >= edge.rightSite.x;
-    if ((rightOfSite && halfedge.leftRight == LR.left) ||
-        (!rightOfSite && halfedge.leftRight == LR.right)) {
+    if ((rightOfSite && halfedge.leftRight == Direction.left) ||
+        (!rightOfSite && halfedge.leftRight == Direction.right)) {
       return null;
     }
 

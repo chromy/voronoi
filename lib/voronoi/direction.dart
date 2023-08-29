@@ -1,16 +1,16 @@
 part of voronoi;
 
-enum LR {
+enum Direction {
   left, right, none;
 
-  LR get other {
+  Direction get other {
     switch (this) {
-      case LR.left:
-        return LR.right;
-      case LR.right:
-        return LR.left;
-      case LR.none:
-        return LR.none;
+      case Direction.left:
+        return Direction.right;
+      case Direction.right:
+        return Direction.left;
+      case Direction.none:
+        return Direction.none;
     }
   }
 }

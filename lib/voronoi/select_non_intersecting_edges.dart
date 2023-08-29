@@ -1,6 +1,6 @@
 part of voronoi;
 
-List<Edge> selectNonIntersectingEdges(var keepOutMask, List<Edge> edgesToTest) {
+List<Edge> selectNonIntersectingEdges(BitmapData? keepOutMask, List<Edge> edgesToTest) {
   if (keepOutMask == null) {
     return edgesToTest;
   }

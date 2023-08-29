@@ -1,14 +1,14 @@
 part of voronoi;
 
 class Polygon {
-  List<Point> vertices;
+  List<Point<num>> vertices;
 
-  Polygon(List<Point> this.vertices);
+  Polygon(this.vertices);
 
   num get area => (signedDoubleArea() * 0.5).abs();
 
   Winding get winding {
-    num theSignedDoubleArea = signedDoubleArea();
+    final num theSignedDoubleArea = signedDoubleArea();
     if (theSignedDoubleArea < 0) {
       return Winding.clockwise;
     }
@@ -21,9 +21,9 @@ class Polygon {
   num signedDoubleArea() {
     int index;
     int nextIndex;
-    int n = vertices.length;
-    Point point;
-    Point next;
+    final int n = vertices.length;
+    Point<num> point;
+    Point<num> next;
     num signedDoubleArea = 0;
     for (index = 0; index < n; ++index) {
       nextIndex = (index + 1) % n;

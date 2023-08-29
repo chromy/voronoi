@@ -57,55 +57,55 @@ part 'voronoi/halfedge_priority_queue.dart';
 class BitmapData {}
 
 class Voronoi {
-  SiteList _sites = SiteList();
-  Map<Point, Site> _sitesIndexedByLocation = {};
+  final SiteList _sites = SiteList();
+  final Map<Point<num>, Site> _sitesIndexedByLocation = <Point<num>, Site>{};
 
-  List<Edge> _edges = [];
+  final List<Edge> _edges = <Edge>[];
 
   List<Edge> get edges => _edges;
 
   // TODO generalize this so it doesn't have to be a rectangle;
   // then we can make the fractal voronois-within-voronois
-  Rectangle _plotBounds;
+  final Rectangle<num> _plotBounds;
 
-  get plotBounds => _plotBounds;
+  Rectangle<num> get plotBounds => _plotBounds;
 
-  Voronoi(List<Point> points, List<int> colors, Rectangle this._plotBounds) {
+  Voronoi(List<Point<num>> points, List<int> colors, this._plotBounds) {
     addSites(points, colors);
     fortunesAlgorithm();
   }
 
-  void addSites(List<Point> points, List<int> colors) {
-    var length = points.length;
+  void addSites(List<Point<num>> points, List<int> colors) {
+    final int length = points.length;
     for (int i = 0; i < length; ++i) {
       addSite(points[i], colors.isNotEmpty ? colors[i] : 0, i);
     }
   }
 
-  void addSite(Point p, int color, int index) {
-    Random random = Random();
-    num weight = random.nextDouble() * 100;
-    Site site = Site(p, index, weight, color);
+  void addSite(Point<num> p, int color, int index) {
+    final Random random = Random();
+    final num weight = random.nextDouble() * 100;
+    final Site site = Site(p, index, weight, color);
     _sites.add(site);
     _sitesIndexedByLocation[p] = site;
   }
 
-  List<Point> region(Point p) {
-    Site? site = _sitesIndexedByLocation[p];
+  List<Point<num>> region(Point<num> p) {
+    final Site? site = _sitesIndexedByLocation[p];
     if (site == null) {
-      return [];
+      return <Point<num>>[];
     }
     return site.region(_plotBounds);
   }
 
   // TODO: bug: if you call this before you call region(), something goes wrong :(
-  List<Point> neighborSitesForSite(Point coord) {
-    List<Point> points = [];
-    Site? site = _sitesIndexedByLocation[coord];
+  List<Point<num>> neighborSitesForSite(Point<num> coord) {
+    final List<Point<num>> points = <Point<num>>[];
+    final Site? site = _sitesIndexedByLocation[coord];
     if (site == null) {
       return points;
     }
-    List<Site> sites = site.neighborSites();
+    final List<Site> sites = site.neighborSites();
     Site neighbor;
     for (neighbor in sites) {
       points.add(neighbor.coord);
@@ -113,56 +113,45 @@ class Voronoi {
     return points;
   }
 
-  List<Circle> circles() {
-    return _sites.circles();
-  }
+  List<Circle> circles() => _sites.circles();
 
-  List<LineSegment> voronoiBoundaryForSite(Point coord) {
-    return visibleLineSegments(selectEdgesForSitePoint(coord, _edges).toList());
-  }
+  List<LineSegment> voronoiBoundaryForSite(Point<num> coord) =>
+      visibleLineSegments(selectEdgesForSitePoint(coord, _edges).toList());
 
-  List<LineSegment> delaunayLinesForSite(Point coord) {
-    return delaunayLinesForEdges(selectEdgesForSitePoint(coord, _edges).toList());
-  }
+  List<LineSegment> delaunayLinesForSite(Point<num> coord) =>
+      delaunayLinesForEdges(selectEdgesForSitePoint(coord, _edges).toList());
 
-  List<LineSegment> voronoiDiagram() {
-    return visibleLineSegments(_edges);
-  }
+  List<LineSegment> voronoiDiagram() => visibleLineSegments(_edges);
 
-  List<LineSegment> delaunayTriangulation({BitmapData? keepOutMask}) {
-    return delaunayLinesForEdges(selectNonIntersectingEdges(keepOutMask, _edges));
-  }
+  List<LineSegment> delaunayTriangulation({BitmapData? keepOutMask}) =>
+      delaunayLinesForEdges(selectNonIntersectingEdges(keepOutMask, _edges));
 
-  List<LineSegment> hull() {
-    return delaunayLinesForEdges(hullEdges().toList());
-  }
+  List<LineSegment> hull() => delaunayLinesForEdges(hullEdges().toList());
 
   Iterable<Edge> hullEdges() {
-    bool myTest(Edge edge) {
-      return edge.isPartOfConvexHull();
-    }
+    bool myTest(Edge edge) => edge.isPartOfConvexHull();
 
     return _edges.where(myTest);
   }
 
-  List<Point> hullPointsInOrder() {
+  List<Point<num>> hullPointsInOrder() {
     List<Edge> theHullEdges = hullEdges().toList();
 
-    List<Point> points = [];
-    if (theHullEdges.length == 0) {
+    final List<Point<num>> points = <Point<num>>[];
+    if (theHullEdges.isEmpty) {
       return points;
     }
 
-    EdgeReorderer reorderer = EdgeReorderer(theHullEdges, "site");
+    final EdgeReorderer reorderer = EdgeReorderer(theHullEdges, "site");
     theHullEdges = reorderer.edges;
-    List<LR> orientations = reorderer.edgeOrientations;
+    final List<Direction> orientations = reorderer.edgeOrientations;
     //reorderer.dispose();
 
-    LR orientation;
+    Direction orientation;
 
-    int n = theHullEdges.length;
+    final int n = theHullEdges.length;
     for (int i = 0; i < n; ++i) {
-      Edge edge = theHullEdges[i];
+      final Edge edge = theHullEdges[i];
       orientation = orientations[i];
       points.add(edge.site(orientation).coord);
     }
@@ -178,9 +167,7 @@ class Voronoi {
   }
   */
 
-  List<List<Point>> regions() {
-    return _sites.regions(_plotBounds);
-  }
+  List<List<Point<num>>> regions() => _sites.regions(_plotBounds);
 
   // TODO: fix
   //List<int> siteColors({BitmapData referenceImage: null}) {
@@ -202,31 +189,29 @@ class Voronoi {
   }
   */
 
-  List<Point> siteCoords() {
-    return _sites.siteCoords();
-  }
+  List<Point<num>> siteCoords() => _sites.siteCoords();
 
   void fortunesAlgorithm() {
     Site? newSite, bottomSite, topSite, tempSite;
     Vertex? v, vertex;
-    Point? newintstar;
-    LR leftRight;
+    Point<num>? newintstar;
+    Direction leftRight;
     Halfedge lbnd, rbnd, llbnd, rrbnd, bisector;
     Edge edge;
 
-    Rectangle dataBounds = _sites.getSitesBounds();
+    final Rectangle<num> dataBounds = _sites.getSitesBounds();
 
-    int sqrt_nsites = (sqrt(_sites.length + 4)).round();
-    HalfedgePriorityQueue heap = HalfedgePriorityQueue(dataBounds.left, dataBounds.height, sqrt_nsites);
-    EdgeList edgeList = EdgeList(dataBounds.left, dataBounds.width, sqrt_nsites);
-    List<Halfedge> halfEdges = [];
-    List<Vertex> vertices = [];
+    final int sqrtNSites = sqrt(_sites.length + 4).round();
+    final HalfedgePriorityQueue heap = HalfedgePriorityQueue(dataBounds.left, dataBounds.height, sqrtNSites);
+    final EdgeList edgeList = EdgeList(dataBounds.left, dataBounds.width, sqrtNSites);
+    final List<Halfedge> halfEdges = <Halfedge>[];
+    final List<Vertex> vertices = <Vertex>[];
 
-    Site? bottomMostSite = _sites.next();
+    final Site? bottomMostSite = _sites.next();
     newSite = _sites.next();
 
     Site? leftRegion(Halfedge he) {
-      Edge? edge = he.edge;
+      final Edge? edge = he.edge;
       if (edge == null) {
         return bottomMostSite;
       }
@@ -234,7 +219,7 @@ class Voronoi {
     }
 
     Site? rightRegion(Halfedge he) {
-      Edge? edge = he.edge;
+      final Edge? edge = he.edge;
       if (edge == null) {
         return bottomMostSite;
       }
@@ -260,7 +245,7 @@ class Voronoi {
         //trace("new edge: " + edge);
         _edges.add(edge);
 
-        bisector = Halfedge(edge, LR.left);
+        bisector = Halfedge(edge, Direction.left);
         halfEdges.add(bisector);
         // inserting two Halfedges into edgeList constitutes Step 10:
         // insert bisector to the right of lbnd:
@@ -270,13 +255,14 @@ class Voronoi {
         if ((vertex = Vertex.intersect(bisector, lbnd)) != null) {
           vertices.add(vertex!);
           heap.remove(lbnd);
-          lbnd.vertex = vertex;
-          lbnd.ystar = vertex.y + newSite.dist(vertex.coord);
+          lbnd
+            ..vertex = vertex
+            ..ystar = vertex.y + newSite.dist(vertex.coord);
           heap.insert(lbnd);
         }
 
         lbnd = bisector;
-        bisector = Halfedge(edge, LR.right);
+        bisector = Halfedge(edge, Direction.right);
         halfEdges.add(bisector);
         // second Halfedge for Step 10:
         // insert bisector to the right of lbnd:
@@ -285,8 +271,9 @@ class Voronoi {
         // second half of Step 11:
         if ((vertex = Vertex.intersect(bisector, rbnd)) != null) {
           vertices.add(vertex!);
-          bisector.vertex = vertex;
-          bisector.ystar = vertex.y + newSite.dist(vertex.coord);
+          bisector
+            ..vertex = vertex
+            ..ystar = vertex.y + newSite.dist(vertex.coord);
           heap.insert(bisector);
         }
 
@@ -303,19 +290,18 @@ class Voronoi {
         // (not actually using these for anything...)
         //_triangles.push(new Triangle(bottomSite, topSite, rightRegion(lbnd)));
 
-        v = lbnd.vertex!;
-        v.setIndex();
+        v = lbnd.vertex!..setIndex();
         lbnd.edge!.setVertex(lbnd.leftRight!, v);
         rbnd.edge!.setVertex(rbnd.leftRight!, v);
         edgeList.remove(lbnd);
         heap.remove(rbnd);
         edgeList.remove(rbnd);
-        leftRight = LR.left;
+        leftRight = Direction.left;
         if (bottomSite!.y > topSite!.y) {
           tempSite = bottomSite;
           bottomSite = topSite;
           topSite = tempSite;
-          leftRight = LR.right;
+          leftRight = Direction.right;
         }
         edge = Edge.createBisectingEdge(bottomSite, topSite);
         _edges.add(edge);
@@ -326,14 +312,16 @@ class Voronoi {
         if ((vertex = Vertex.intersect(llbnd, bisector)) != null) {
           vertices.add(vertex!);
           heap.remove(llbnd);
-          llbnd.vertex = vertex;
-          llbnd.ystar = vertex.y + bottomSite.dist(vertex.coord);
+          llbnd
+            ..vertex = vertex
+            ..ystar = vertex.y + bottomSite.dist(vertex.coord);
           heap.insert(llbnd);
         }
         if ((vertex = Vertex.intersect(bisector, rrbnd)) != null) {
           vertices.add(vertex!);
-          bisector.vertex = vertex;
-          bisector.ystar = vertex.y + bottomSite.dist(vertex.coord);
+          bisector
+            ..vertex = vertex
+            ..ystar = vertex.y + bottomSite.dist(vertex.coord);
           heap.insert(bisector);
         }
       } else {
@@ -351,7 +339,7 @@ class Voronoi {
     halfEdges.length = 0;
 
     // we need the vertices to clip the edges
-    for (Edge edge in _edges) {
+    for (final Edge edge in _edges) {
       edge.clipVertices(_plotBounds);
     }
     // but we don't actually ever use them again!
@@ -361,11 +349,22 @@ class Voronoi {
     vertices.length = 0;
   }
 
-  static int compareByYThenX(Site s1, var s2) {
-    if (s1.y < s2.y) return -1;
-    if (s1.y > s2.y) return 1;
-    if (s1.x < s2.x) return -1;
-    if (s1.x > s2.x) return 1;
+  static int compareByYThenX(Site s1, Point<num>? s2) {
+    if (s2 == null) {
+      return 0;
+    }
+    if (s1.y < s2.y) {
+      return -1;
+    }
+    if (s1.y > s2.y) {
+      return 1;
+    }
+    if (s1.x < s2.x) {
+      return -1;
+    }
+    if (s1.x > s2.x) {
+      return 1;
+    }
     return 0;
   }
 }
