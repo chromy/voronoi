@@ -43,16 +43,6 @@ part 'voronoi/triangle.dart';
 
 part 'voronoi/edge_reorderer.dart';
 
-part 'voronoi/select_non_intersecting_edges.dart';
-
-part 'voronoi/select_edges_for_site_point.dart';
-
-part 'voronoi/delaunay_lines_for_edges.dart';
-
-part 'voronoi/spanning_tree.dart';
-
-part 'voronoi/visible_line_segments.dart';
-
 part 'voronoi/halfedge_priority_queue.dart';
 
 class BitmapData {}
@@ -116,24 +106,32 @@ class Voronoi {
 
   List<Circle> circles() => _sites.circles();
 
-  List<LineSegment> voronoiBoundaryForSite(Point<num> coord) =>
-      visibleLineSegments(selectEdgesForSitePoint(coord, _edges).toList());
+  Iterable<LineSegment> voronoiBoundaryForSite(Point<num> coord) =>
+      visibleLineSegments(selectEdgesForSitePoint(coord, _edges));
 
-  List<LineSegment> delaunayLinesForSite(Point<num> coord) =>
-      delaunayLinesForEdges(selectEdgesForSitePoint(coord, _edges).toList());
+  Iterable<LineSegment> delaunayLinesForSite(Point<num> coord) =>
+      delaunayLinesForEdges(selectEdgesForSitePoint(coord, _edges));
 
-  List<LineSegment> voronoiDiagram() => visibleLineSegments(_edges);
+  Iterable<LineSegment> voronoiDiagram() => visibleLineSegments(_edges);
 
-  List<LineSegment> delaunayTriangulation({BitmapData? keepOutMask}) =>
-      delaunayLinesForEdges(selectNonIntersectingEdges(keepOutMask, _edges));
+  Iterable<LineSegment> delaunayTriangulation() => delaunayLinesForEdges(_edges);
 
-  List<LineSegment> hull() => delaunayLinesForEdges(hullEdges().toList());
+  Iterable<LineSegment> hull() => delaunayLinesForEdges(hullEdges());
 
-  Iterable<Edge> hullEdges() {
-    bool myTest(Edge edge) => edge.isPartOfConvexHull();
+  Iterable<LineSegment> delaunayLinesForEdges(Iterable<Edge> edges) => edges.map((Edge edge) => edge.delaunayLine());
 
-    return _edges.where(myTest);
-  }
+  Iterable<Edge> selectEdgesForSitePoint(Point<num> coord, Iterable<Edge> edgesToTest) =>
+      edgesToTest.where((Edge edge) => edge.leftSite.coord == coord || edge.rightSite.coord == coord);
+
+  Iterable<LineSegment> visibleLineSegments(Iterable<Edge> edges) => edges.map((Edge edge) {
+        if (edge.visible) {
+          final Point<num> p1 = edge.clippedEnds![Direction.left]!;
+          final Point<num> p2 = edge.clippedEnds![Direction.right]!;
+          return LineSegment(p1, p2);
+        }
+      }).whereType<LineSegment>();
+
+  Iterable<Edge> hullEdges() => _edges.where((Edge edge) => edge.isPartOfConvexHull());
 
   List<Point<num>> hullPointsInOrder() {
     List<Edge> theHullEdges = hullEdges().toList();
@@ -159,36 +157,7 @@ class Voronoi {
     return points;
   }
 
-  // TODO: fix
-  /*
-  List<LineSegement> spanningTree({String type: "minimum", BitmapData keepOutMask : null}){
-    List<Edge> edges = selectNonIntersectingEdges(keepOutMask, _edges);
-    List<LineSegment> segments = delaunayLinesForEdges(edges);
-    return kruskal(segments, type);
-  }
-  */
-
   List<List<Point<num>>> regions() => _sites.regions(_plotBounds);
-
-  // TODO: fix
-  //List<int> siteColors({BitmapData referenceImage: null}) {
-  //  return _sites.siteColors(referenceImage);
-  //}
-
-  // TODO: fix
-  /*
-  /**
-   *
-   * @param proximityMap a BitmapData whose regions are filled with the site index values; see PlanePointsCanvas::fillRegions()
-   * @param x
-   * @param y
-   * @return coordinates of nearest Site to (x, y)
-   *
-   */
-  Point nearestSitePoint(BitmapData proximityMap, num x, num y) {
-    return _sites.nearestSitePoint(proximityMap, x, y);
-  }
-  */
 
   List<Point<num>> siteCoords() => _sites.siteCoords();
 
