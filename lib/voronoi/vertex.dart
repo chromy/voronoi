@@ -7,12 +7,10 @@ class Vertex {
   // TODO: make x and y unsetable
   // TODO: fix coord/vertex
   num x, y;
-  Point coord;
-  int _vertexIndex;
+  late Point coord;
+  int _vertexIndex = 0;
 
-  Vertex(num x, num y) {
-    this.x = x;
-    this.y = y;
+  Vertex(this.x, this.y) {
     coord = Point(x, y);
   }
 
@@ -33,8 +31,8 @@ class Vertex {
   /// @param halfedge1
   /// @return
   ///
-  factory Vertex.intersect(Halfedge halfedge0, Halfedge halfedge1) {
-    Edge edge0, edge1, edge;
+  static Vertex? intersect(Halfedge halfedge0, Halfedge halfedge1) {
+    Edge? edge0, edge1, edge;
     Halfedge halfedge;
     num determinant, intersectionX, intersectionY;
     bool rightOfSite;

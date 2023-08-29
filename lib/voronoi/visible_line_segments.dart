@@ -5,8 +5,8 @@ List<LineSegment> visibleLineSegments(List<Edge> edges) {
 
   for (Edge edge in edges) {
     if (edge.visible) {
-      Point p1 = edge.clippedEnds[LR.LEFT];
-      Point p2 = edge.clippedEnds[LR.RIGHT];
+      Point p1 = edge.clippedEnds![LR.LEFT];
+      Point p2 = edge.clippedEnds![LR.RIGHT];
       segments.add(LineSegment(p1, p2));
     }
   }

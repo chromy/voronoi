@@ -4,20 +4,21 @@ class EdgeList {
   num _deltax;
   num _xmin;
 
-  int _hashsize;
-  List<Halfedge> _hash;
-  Halfedge _leftEnd;
+  late int _hashsize;
+  late List<Halfedge?> _hash;
+  late Halfedge _leftEnd;
+
   Halfedge get leftEnd => _leftEnd;
-  Halfedge _rightEnd;
+  late Halfedge _rightEnd;
+
   Halfedge get rightEnd => _rightEnd;
 
-  EdgeList(num xmin, num deltax, int sqrt_nsites) {
-    _xmin = xmin;
+  EdgeList(this._xmin, this._deltax, int sqrt_nsites) {
     // TODO: fix hack
-    _deltax = deltax == 0 ? 1 : deltax;
+    _deltax = _deltax == 0 ? 1 : _deltax;
     _hashsize = 2 * sqrt_nsites;
 
-    _hash = List(_hashsize);
+    _hash = List.filled(_hashsize, null);
 
     // two dummy Halfedges:
     _leftEnd = Halfedge.createDummy();
@@ -37,7 +38,7 @@ class EdgeList {
   void insert(Halfedge lb, Halfedge newHalfedge) {
     newHalfedge.edgeListLeftNeighbor = lb;
     newHalfedge.edgeListRightNeighbor = lb.edgeListRightNeighbor;
-    lb.edgeListRightNeighbor.edgeListLeftNeighbor = newHalfedge;
+    lb.edgeListRightNeighbor!.edgeListLeftNeighbor = newHalfedge;
     lb.edgeListRightNeighbor = newHalfedge;
   }
 
@@ -46,10 +47,8 @@ class EdgeList {
   /// @param halfEdge
   ///
   void remove(Halfedge halfEdge) {
-    halfEdge.edgeListLeftNeighbor.edgeListRightNeighbor =
-        halfEdge.edgeListRightNeighbor;
-    halfEdge.edgeListRightNeighbor.edgeListLeftNeighbor =
-        halfEdge.edgeListLeftNeighbor;
+    halfEdge.edgeListLeftNeighbor!.edgeListRightNeighbor = halfEdge.edgeListRightNeighbor;
+    halfEdge.edgeListRightNeighbor!.edgeListLeftNeighbor = halfEdge.edgeListLeftNeighbor;
     halfEdge.edge = Edge.DELETED;
     halfEdge.edgeListLeftNeighbor = halfEdge.edgeListRightNeighbor = null;
   }
@@ -60,7 +59,7 @@ class EdgeList {
   ///
   Halfedge edgeListLeftNeighbor(Point<num> p) {
     int bucket;
-    Halfedge halfEdge;
+    Halfedge? halfEdge;
 
     /* Use hash table to get close to desired halfedge */
     bucket = ((p.x - _xmin) / _deltax * _hashsize).round();
@@ -79,14 +78,14 @@ class EdgeList {
     }
 
     /* Now search linear list of halfedges for the correct one */
-    if (halfEdge == leftEnd || (halfEdge != rightEnd && halfEdge.isLeftOf(p))) {
+    if (halfEdge == leftEnd || (halfEdge != rightEnd && halfEdge!.isLeftOf(p))) {
       do {
-        halfEdge = halfEdge.edgeListRightNeighbor;
+        halfEdge = halfEdge!.edgeListRightNeighbor!;
       } while (halfEdge != rightEnd && halfEdge.isLeftOf(p));
-      halfEdge = halfEdge.edgeListLeftNeighbor;
+      halfEdge = halfEdge.edgeListLeftNeighbor!;
     } else {
       do {
-        halfEdge = halfEdge.edgeListLeftNeighbor;
+        halfEdge = halfEdge!.edgeListLeftNeighbor!;
       } while (halfEdge != leftEnd && !halfEdge.isLeftOf(p));
     }
 
@@ -98,8 +97,8 @@ class EdgeList {
   }
 
   /* Get entry from hash table, pruning any deleted nodes */
-  Halfedge getHash(int b) {
-    Halfedge halfEdge;
+  Halfedge? getHash(int b) {
+    Halfedge? halfEdge;
 
     if (b < 0 || b >= _hashsize) {
       return null;

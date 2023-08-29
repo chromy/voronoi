@@ -2,19 +2,17 @@ part of voronoi;
 
 // also known as heap
 class HalfedgePriorityQueue {
-  List<Halfedge> _hash;
-  int _count;
-  int _minBucket;
-  int _hashsize;
+  List<Halfedge> _hash = [];
+  int _count = 0;
+  int _minBucket = 0;
+  late int _hashsize;
 
   num _ymin;
   num _deltay;
 
-  HalfedgePriorityQueue(num ymin, num deltay, int sqrt_nsites) {
-    _ymin = ymin;
-    _deltay = deltay;
+  HalfedgePriorityQueue(this._ymin, num this._deltay, int sqrt_nsites) {
     _hashsize = 4 * sqrt_nsites;
-    initialize();
+    _hash = List.filled(_hashsize, Halfedge.createDummy());
   }
 
   /*
@@ -29,33 +27,21 @@ class HalfedgePriorityQueue {
   }
   */
 
-  void initialize() {
-    int i;
-
-    _count = 0;
-    _minBucket = 0;
-    _hash = List(_hashsize);
-    // dummy Halfedge at the top of each hash
-    for (i = 0; i < _hashsize; ++i) {
-      _hash[i] = Halfedge.createDummy();
-      _hash[i].nextInPriorityQueue = null;
-    }
-  }
 
   void insert(Halfedge halfEdge) {
-    Halfedge previous, next;
+    Halfedge? previous, next;
     int insertionBucket = bucket(halfEdge);
     if (insertionBucket < _minBucket) {
       _minBucket = insertionBucket;
     }
     previous = _hash[insertionBucket];
-    while ((next = previous.nextInPriorityQueue) != null &&
-        (halfEdge.ystar > next.ystar ||
+    while ((next = previous?.nextInPriorityQueue) != null &&
+        (halfEdge.ystar > next!.ystar ||
             (halfEdge.ystar == next.ystar &&
-                halfEdge.vertex.x > next.vertex.x))) {
+                halfEdge.vertex!.x > next.vertex!.x))) {
       previous = next;
     }
-    halfEdge.nextInPriorityQueue = previous.nextInPriorityQueue;
+    halfEdge.nextInPriorityQueue = previous!.nextInPriorityQueue;
     previous.nextInPriorityQueue = halfEdge;
     ++_count;
   }
@@ -67,7 +53,7 @@ class HalfedgePriorityQueue {
     if (halfEdge.vertex != null) {
       previous = _hash[removalBucket];
       while (previous.nextInPriorityQueue != halfEdge) {
-        previous = previous.nextInPriorityQueue;
+        previous = previous.nextInPriorityQueue!;
       }
       previous.nextInPriorityQueue = halfEdge.nextInPriorityQueue;
       _count--;
@@ -104,8 +90,8 @@ class HalfedgePriorityQueue {
   ///
   Point min() {
     adjustMinBucket();
-    Halfedge answer = _hash[_minBucket].nextInPriorityQueue;
-    return Point(answer.vertex.x, answer.ystar);
+    Halfedge? answer = _hash[_minBucket].nextInPriorityQueue;
+    return Point(answer!.vertex!.x, answer.ystar);
   }
 
   /// remove and return the min Halfedge
@@ -115,7 +101,7 @@ class HalfedgePriorityQueue {
     Halfedge answer;
 
     // get the first real Halfedge in _minBucket
-    answer = _hash[_minBucket].nextInPriorityQueue;
+    answer = _hash[_minBucket].nextInPriorityQueue!;
 
     _hash[_minBucket].nextInPriorityQueue = answer.nextInPriorityQueue;
     _count--;

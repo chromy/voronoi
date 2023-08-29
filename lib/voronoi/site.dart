@@ -14,23 +14,16 @@ class Site {
   int _siteIndex;
 
   // the edges that define this Site's Voronoi region:
-  List<Edge> _edges;
+  List<Edge> _edges = [];
   List<Edge> get edges => _edges;
 
   // which end of each edge hooks up with the previous edge in _edges:
-  List<LR> _edgeOrientations;
+  List<LR>? _edgeOrientations;
 
   // ordered list of points that define the region clipped to bounds:
-  List<Point> _region;
+  List<Point>? _region;
 
-  Site(Point p, int index, num weight, int color) {
-    _coord = p;
-    _siteIndex = index;
-    this.weight = weight;
-    this.color = color;
-    _edges = [];
-    _region = null;
-  }
+  Site(this._coord, this._siteIndex, this.weight, this.color);
 
   void addEdge(Edge edge) {
     _edges.add(edge);
@@ -42,21 +35,23 @@ class Site {
   }
 
   List<Site> neighborSites() {
-    if (_edges == null || _edges.length == 0) {
+    if (_edges.isEmpty) {
       return [];
     }
     if (_edgeOrientations == null) {
       reorderEdges();
     }
-    var list = [];
+    List<Site> list = [];
     Edge edge;
     for (edge in _edges) {
-      list.add(neighborSite(edge));
+      if (neighborSite(edge) != null) {
+        list.add(neighborSite(edge)!);
+      }
     }
     return list;
   }
 
-  Site neighborSite(Edge edge) {
+  Site? neighborSite(Edge edge) {
     if (this == edge.leftSite) {
       return edge.rightSite;
     }
@@ -67,17 +62,17 @@ class Site {
   }
 
   List<Point> region(Rectangle clippingBounds) {
-    if (_edges == null || _edges.length == 0) {
+    if (_edges.isEmpty) {
       return [];
     }
     if (_edgeOrientations == null) {
       reorderEdges();
       _region = clipToBounds(clippingBounds);
-      if ((Polygon(_region)).winding == Winding.CLOCKWISE) {
-        _region = List.from(_region.reversed);
+      if (Polygon(_region!).winding == Winding.CLOCKWISE) {
+        _region = List.from(_region!.reversed);
       }
     }
-    return _region;
+    return _region!;
   }
 
   void reorderEdges() {
@@ -87,7 +82,7 @@ class Site {
   }
 
   List<Point> clipToBounds(Rectangle bounds) {
-    var points = [];
+    List<Point> points = [];
     int n = _edges.length;
     int i = 0;
     Edge edge;
@@ -100,9 +95,9 @@ class Site {
       return [];
     }
     edge = _edges[i];
-    LR orientation = _edgeOrientations[i];
-    points.add(edge.clippedEnds[orientation]);
-    points.add(edge.clippedEnds[orientation.other]);
+    LR orientation = _edgeOrientations![i];
+    points.add(edge.clippedEnds![orientation]);
+    points.add(edge.clippedEnds![orientation.other]);
 
     for (int j = i + 1; j < n; ++j) {
       edge = _edges[j];
@@ -121,9 +116,9 @@ class Site {
       {bool closingUp = false}) {
     Point rightPoint = points[points.length - 1];
     Edge newEdge = _edges[j];
-    LR newOrientation = _edgeOrientations[j];
+    LR newOrientation = _edgeOrientations![j];
     // the point that  must be connected to rightPoint:
-    Point newPoint = newEdge.clippedEnds[newOrientation];
+    Point newPoint = newEdge.clippedEnds![newOrientation];
     if (!closeEnough(rightPoint, newPoint)) {
       // The points do not coincide, so they must have been clipped at the bounds;
       // see if they are on the same border of the bounds:
@@ -216,7 +211,7 @@ class Site {
       }
       points.add(newPoint);
     }
-    Point newRightPoint = newEdge.clippedEnds[newOrientation.other];
+    Point newRightPoint = newEdge.clippedEnds![newOrientation.other];
     if (!closeEnough(points[0], newRightPoint)) {
       points.add(newRightPoint);
     }

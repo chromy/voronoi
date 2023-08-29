@@ -1,8 +1,8 @@
 part of voronoi;
 
 class EdgeReorderer {
-  List<Edge> _edges;
-  List<LR> _edgeOrientations;
+  List<Edge> _edges = [];
+  List<LR> _edgeOrientations = [];
   List<Edge> get edges => _edges;
   List<LR> get edgeOrientations => _edgeOrientations;
 
@@ -10,8 +10,6 @@ class EdgeReorderer {
     if (criterion != "vertex" && criterion != "site") {
       throw ArgumentError("Edges: criterion must be vertex or site");
     }
-    _edges = [];
-    _edgeOrientations = [];
     if (origEdges.length > 0) {
       _edges = reorderEdges(origEdges, criterion);
     }

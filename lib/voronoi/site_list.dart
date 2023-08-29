@@ -1,15 +1,12 @@
 part of voronoi;
 
 class SiteList {
-  List<Site> _sites;
-  int _currentIndex;
+  List<Site> _sites = [];
+  int _currentIndex = 0;
 
-  bool _sorted;
+  bool _sorted = false;
 
-  SiteList() {
-    _sites = [];
-    _sorted = false;
-  }
+  SiteList();
 
   void add(Site site) {
     _sorted = false;
@@ -18,7 +15,7 @@ class SiteList {
 
   int get length => _sites.length;
 
-  Site next() {
+  Site? next() {
     if (!_sorted) {
       //"SiteList::next():  sites have not been sorted"
       throw Error();
@@ -78,13 +75,13 @@ class SiteList {
       if (!nearestEdge.isPartOfConvexHull()) {
         radius = nearestEdge.sitesDistance() * 0.5;
       }
-      circles.add(Circle(site.x, site.y, radius));
+      circles.add(Circle(site._coord, radius));
     }
     return circles;
   }
 
   List<List<Point>> regions(Rectangle plotBounds) {
-    var regions = [];
+    List<List<Point>> regions = [];
     for (Site site in _sites) {
       regions.add(site.region(plotBounds));
     }

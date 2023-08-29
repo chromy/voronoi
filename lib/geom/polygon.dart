@@ -3,9 +3,7 @@ part of voronoi;
 class Polygon {
   List<Point> vertices;
 
-  Polygon(List<Point> vertices) {
-    this.vertices = vertices;
-  }
+  Polygon(List<Point> this.vertices);
 
   num get area => (signedDoubleArea() * 0.5).abs();
 

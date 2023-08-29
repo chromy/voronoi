@@ -6,21 +6,21 @@ class Edge {
   static final DELETED = Edge();
 
   // the two input Sites for which this Edge is a bisector:
-  Site leftSite;
-  Site rightSite;
+  late Site leftSite;
+  late Site rightSite;
 
   // the two Voronoi vertices that the edge connects
   //    (if one of them is null, the edge extends to infinity)
-  Vertex leftVertex;
-  Vertex rightVertex;
+  late Vertex? leftVertex;
+  late Vertex? rightVertex;
 
-  Point<num> get leftClippedEnd => _clippedVertices[LR.LEFT];
-  Point<num> get rightClippedEnd => _clippedVertices[LR.RIGHT];
+  Point<num>? get leftClippedEnd => _clippedVertices?[LR.LEFT];
+  Point<num>? get rightClippedEnd => _clippedVertices?[LR.RIGHT];
 
   // the equation of the edge: ax + by = c
-  num a, b, c;
+  late num a, b, c;
 
-  Map<LR, Point> _clippedVertices;
+  late Map<LR, Point>? _clippedVertices;
 
   Edge();
 
@@ -76,11 +76,11 @@ class Edge {
     if (!visible) {
       return LineSegment(null, null);
     } else {
-      return LineSegment(_clippedVertices[LR.LEFT], _clippedVertices[LR.RIGHT]);
+      return LineSegment(_clippedVertices?[LR.LEFT], _clippedVertices?[LR.RIGHT]);
     }
   }
 
-  Vertex vertex(LR leftRight) {
+  Vertex? vertex(LR leftRight) {
     return (leftRight == LR.LEFT) ? leftVertex : rightVertex;
   }
 
@@ -92,7 +92,10 @@ class Edge {
     }
   }
 
-  Site site(LR leftRight) {
+  Site site(LR? leftRight) {
+    if (leftRight == null) {
+      throw ArgumentError.notNull("leftRight");
+    }
     return (leftRight == LR.LEFT) ? leftSite : rightSite;
   }
 
@@ -110,7 +113,7 @@ class Edge {
 
   // Once clipVertices() is called, this Dictionary will hold two Points
   // representing the clipped coordinates of the left and right ends...
-  Map get clippedEnds {
+  Map? get clippedEnds {
     return _clippedVertices;
   }
 
@@ -130,7 +133,7 @@ class Edge {
     num xmax = bounds.right;
     num ymax = bounds.bottom;
 
-    Vertex vertex0, vertex1;
+    Vertex? vertex0, vertex1;
     num x0, x1, y0, y1;
 
     if (a == 1.0 && b >= 0.0) {
@@ -221,11 +224,11 @@ class Edge {
 
     _clippedVertices = Map();
     if (vertex0 == leftVertex) {
-      _clippedVertices[LR.LEFT] = Point(x0, y0);
-      _clippedVertices[LR.RIGHT] = Point(x1, y1);
+      _clippedVertices?[LR.LEFT] = Point(x0, y0);
+      _clippedVertices?[LR.RIGHT] = Point(x1, y1);
     } else {
-      _clippedVertices[LR.RIGHT] = Point(x0, y0);
-      _clippedVertices[LR.LEFT] = Point(x1, y1);
+      _clippedVertices?[LR.RIGHT] = Point(x0, y0);
+      _clippedVertices?[LR.LEFT] = Point(x1, y1);
     }
   }
 }
