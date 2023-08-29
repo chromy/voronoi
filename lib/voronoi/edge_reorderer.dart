@@ -27,7 +27,7 @@ class EdgeReorderer {
     i = 0;
     edge = origEdges[i];
     newEdges.add(edge);
-    _edgeOrientations.add(LR.LEFT);
+    _edgeOrientations.add(LR.left);
 
     var firstPoint = (criterion == "vertex") ? edge.leftVertex : edge.leftSite;
     var lastPoint = (criterion == "vertex") ? edge.rightVertex : edge.rightSite;
@@ -56,22 +56,22 @@ class EdgeReorderer {
         }
         if (leftPoint == lastPoint) {
           lastPoint = rightPoint;
-          _edgeOrientations.add(LR.LEFT);
+          _edgeOrientations.add(LR.left);
           newEdges.add(edge);
           done[i] = true;
         } else if (rightPoint == firstPoint) {
           firstPoint = leftPoint;
-          _edgeOrientations.insert(0, LR.LEFT);
+          _edgeOrientations.insert(0, LR.left);
           newEdges.insert(0, edge);
           done[i] = true;
         } else if (leftPoint == firstPoint) {
           firstPoint = rightPoint;
-          _edgeOrientations.insert(0, LR.RIGHT);
+          _edgeOrientations.insert(0, LR.right);
           newEdges.insert(0, edge);
           done[i] = true;
         } else if (rightPoint == lastPoint) {
           lastPoint = leftPoint;
-          _edgeOrientations.add(LR.RIGHT);
+          _edgeOrientations.add(LR.right);
           newEdges.add(edge);
           done[i] = true;
         }

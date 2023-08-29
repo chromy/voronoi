@@ -28,7 +28,7 @@ part 'voronoi/edge.dart';
 
 part 'voronoi/edge_list.dart';
 
-part 'voronoi/lr.dart';
+part 'voronoi/direction.dart';
 
 part 'voronoi/vertex.dart';
 
@@ -260,7 +260,7 @@ class Voronoi {
         //trace("new edge: " + edge);
         _edges.add(edge);
 
-        bisector = Halfedge(edge, LR.LEFT);
+        bisector = Halfedge(edge, LR.left);
         halfEdges.add(bisector);
         // inserting two Halfedges into edgeList constitutes Step 10:
         // insert bisector to the right of lbnd:
@@ -276,7 +276,7 @@ class Voronoi {
         }
 
         lbnd = bisector;
-        bisector = Halfedge(edge, LR.RIGHT);
+        bisector = Halfedge(edge, LR.right);
         halfEdges.add(bisector);
         // second Halfedge for Step 10:
         // insert bisector to the right of lbnd:
@@ -310,12 +310,12 @@ class Voronoi {
         edgeList.remove(lbnd);
         heap.remove(rbnd);
         edgeList.remove(rbnd);
-        leftRight = LR.LEFT;
+        leftRight = LR.left;
         if (bottomSite!.y > topSite!.y) {
           tempSite = bottomSite;
           bottomSite = topSite;
           topSite = tempSite;
-          leftRight = LR.RIGHT;
+          leftRight = LR.right;
         }
         edge = Edge.createBisectingEdge(bottomSite, topSite);
         _edges.add(edge);

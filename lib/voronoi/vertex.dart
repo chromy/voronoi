@@ -65,8 +65,8 @@ class Vertex {
       edge = edge1;
     }
     rightOfSite = intersectionX >= edge.rightSite.x;
-    if ((rightOfSite && halfedge.leftRight == LR.LEFT) ||
-        (!rightOfSite && halfedge.leftRight == LR.RIGHT)) {
+    if ((rightOfSite && halfedge.leftRight == LR.left) ||
+        (!rightOfSite && halfedge.leftRight == LR.right)) {
       return null;
     }
 

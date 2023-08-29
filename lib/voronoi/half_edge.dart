@@ -34,11 +34,11 @@ class Halfedge {
     topSite = edge!.rightSite;
     rightOfSite = p.x > topSite.x;
 
-    if (rightOfSite && this.leftRight == LR.LEFT) {
+    if (rightOfSite && this.leftRight == LR.left) {
       return true;
     }
 
-    if (!rightOfSite && this.leftRight == LR.RIGHT) {
+    if (!rightOfSite && this.leftRight == LR.right) {
       return false;
     }
 
@@ -73,6 +73,6 @@ class Halfedge {
       t3 = yl - topSite.y;
       above = t1 * t1 > t2 * t2 + t3 * t3;
     }
-    return this.leftRight == LR.LEFT ? above : !above;
+    return this.leftRight == LR.left ? above : !above;
   }
 }

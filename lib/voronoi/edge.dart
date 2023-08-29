@@ -14,8 +14,8 @@ class Edge {
   late Vertex? leftVertex;
   late Vertex? rightVertex;
 
-  Point<num>? get leftClippedEnd => _clippedVertices?[LR.LEFT];
-  Point<num>? get rightClippedEnd => _clippedVertices?[LR.RIGHT];
+  Point<num>? get leftClippedEnd => _clippedVertices?[LR.left];
+  Point<num>? get rightClippedEnd => _clippedVertices?[LR.right];
 
   // the equation of the edge: ax + by = c
   late num a, b, c;
@@ -76,16 +76,16 @@ class Edge {
     if (!visible) {
       return LineSegment(null, null);
     } else {
-      return LineSegment(_clippedVertices?[LR.LEFT], _clippedVertices?[LR.RIGHT]);
+      return LineSegment(_clippedVertices?[LR.left], _clippedVertices?[LR.right]);
     }
   }
 
   Vertex? vertex(LR leftRight) {
-    return (leftRight == LR.LEFT) ? leftVertex : rightVertex;
+    return (leftRight == LR.left) ? leftVertex : rightVertex;
   }
 
   void setVertex(LR leftRight, Vertex v) {
-    if (leftRight == LR.LEFT) {
+    if (leftRight == LR.left) {
       leftVertex = v;
     } else {
       rightVertex = v;
@@ -96,7 +96,7 @@ class Edge {
     if (leftRight == null) {
       throw ArgumentError.notNull("leftRight");
     }
-    return (leftRight == LR.LEFT) ? leftSite : rightSite;
+    return (leftRight == LR.left) ? leftSite : rightSite;
   }
 
   bool isPartOfConvexHull() {
@@ -224,11 +224,11 @@ class Edge {
 
     _clippedVertices = Map();
     if (vertex0 == leftVertex) {
-      _clippedVertices?[LR.LEFT] = Point(x0, y0);
-      _clippedVertices?[LR.RIGHT] = Point(x1, y1);
+      _clippedVertices?[LR.left] = Point(x0, y0);
+      _clippedVertices?[LR.right] = Point(x1, y1);
     } else {
-      _clippedVertices?[LR.RIGHT] = Point(x0, y0);
-      _clippedVertices?[LR.LEFT] = Point(x1, y1);
+      _clippedVertices?[LR.right] = Point(x0, y0);
+      _clippedVertices?[LR.left] = Point(x1, y1);
     }
   }
 }
