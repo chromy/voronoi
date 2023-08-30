@@ -18,22 +18,16 @@ import 'dart:collection';
 import 'dart:math' as math;
 
 part 'geom/circle.dart';
-
 part 'geom/line_segment.dart';
-
 part 'geom/point.dart';
-
 part 'geom/polygon.dart';
-
 part 'geom/triangle.dart';
-
 part 'geom/winding.dart';
 part 'voronoi/direction.dart';
 part 'voronoi/edge.dart';
 part 'voronoi/edge_list.dart';
 part 'voronoi/edge_reorderer.dart';
 part 'voronoi/half_edge.dart';
-part 'voronoi/halfedge_priority_queue.dart';
 part 'voronoi/site.dart';
 part 'voronoi/site_list.dart';
 part 'voronoi/vertex.dart';
@@ -140,7 +134,6 @@ class Voronoi {
     final EdgeReorderer reorderer = EdgeReorderer(theHullEdges, "site");
     theHullEdges = reorderer.edges;
     final List<Direction> orientations = reorderer.edgeOrientations;
-    //reorderer.dispose();
 
     Direction direction;
 
@@ -162,7 +155,6 @@ class Voronoi {
   void fortunesAlgorithm() {
     Site<num>? newSite, bottomSite, topSite, tempSite;
     Vertex<num>? v, vertex;
-    Point<num>? newintstar;
     Direction direction;
     HalfEdge lbnd, rbnd, llbnd, rrbnd, bisector;
     Edge edge;
@@ -170,7 +162,7 @@ class Voronoi {
     final math.Rectangle<num> dataBounds = _sites.getSitesBounds();
 
     final int sqrtNSites = math.sqrt(_sites.length + 4).round();
-    final HalfedgePriorityQueue heap = HalfedgePriorityQueue(dataBounds.left, dataBounds.height, sqrtNSites);
+    final SplayTreeMap<Point<num>, HalfEdge> heap = SplayTreeMap<Point<num>, HalfEdge>();
     final EdgeList edgeList = EdgeList(dataBounds.left, dataBounds.width, sqrtNSites);
     final List<HalfEdge> halfEdges = <HalfEdge>[];
     final List<Vertex<num>> vertices = <Vertex<num>>[];
@@ -195,11 +187,7 @@ class Voronoi {
     }
 
     for (;;) {
-      if (!heap.empty()) {
-        newintstar = heap.min();
-      }
-
-      if (newSite != null && (heap.empty() || newSite.compareTo(newintstar!) < 0)) {
+      if (newSite != null && (heap.isEmpty || newSite.compareTo(heap.firstKey()!) < 0)) {
         /* new site is smallest */
 
         // Step 8:
@@ -222,11 +210,11 @@ class Voronoi {
         // first half of Step 11:
         if ((vertex = Vertex.intersect(bisector, lbnd)) != null) {
           vertices.add(vertex!);
-          heap.remove(lbnd);
+          heap.remove(lbnd.hashPoint);
           lbnd
             ..vertex = vertex
             ..yStar = vertex.y + newSite.distanceTo(vertex);
-          heap.insert(lbnd);
+          heap[lbnd.hashPoint] = lbnd;
         }
 
         lbnd = bisector;
@@ -242,13 +230,14 @@ class Voronoi {
           bisector
             ..vertex = vertex
             ..yStar = vertex.y + newSite.distanceTo(vertex);
-          heap.insert(bisector);
+          heap[bisector.hashPoint] = bisector;
         }
 
         newSite = _sites.next();
-      } else if (!heap.empty()) {
+      } else if (heap.isNotEmpty) {
         /* intersection is smallest */
-        lbnd = heap.extractMin();
+        lbnd = heap[heap.firstKey()]!;
+        heap.remove(lbnd.hashPoint);
         llbnd = lbnd.edgeListLeftNeighbor!;
         rbnd = lbnd.edgeListRightNeighbor!;
         rrbnd = rbnd.edgeListRightNeighbor!;
@@ -262,7 +251,7 @@ class Voronoi {
         lbnd.edge!.vertices[lbnd.direction] = v;
         rbnd.edge!.vertices[rbnd.direction] = v;
         edgeList.remove(lbnd);
-        heap.remove(rbnd);
+        heap.remove(rbnd.hashPoint);
         edgeList.remove(rbnd);
         direction = Direction.left;
         if (bottomSite!.y > topSite!.y) {
@@ -279,42 +268,30 @@ class Voronoi {
         edge.vertices[direction.other] = v;
         if ((vertex = Vertex.intersect(llbnd, bisector)) != null) {
           vertices.add(vertex!);
-          heap.remove(llbnd);
+          heap.remove(llbnd.hashPoint);
           llbnd
             ..vertex = vertex
             ..yStar = vertex.y + bottomSite.distanceTo(vertex);
-          heap.insert(llbnd);
+          heap[llbnd.hashPoint] = llbnd;
         }
         if ((vertex = Vertex.intersect(bisector, rrbnd)) != null) {
           vertices.add(vertex!);
           bisector
             ..vertex = vertex
             ..yStar = vertex.y + bottomSite.distanceTo(vertex);
-          heap.insert(bisector);
+          heap[bisector.hashPoint] = bisector;
         }
       } else {
         break;
       }
     }
 
-    // heap should be empty now
-    //heap.dispose();
-    //edgeList.dispose();
-
-    //for (Halfedge halfEdge in halfEdges) {
-    //  halfEdge.reallyDispose();
-    //}
     halfEdges.length = 0;
 
     // we need the vertices to clip the edges
     for (final Edge edge in _edges) {
       edge.clipVertices(_plotBounds);
     }
-    // but we don't actually ever use them again!
-    //for (Vertex vertex in vertices) {
-    //vertex.dispose();
-    //}
     vertices.length = 0;
   }
-
 }

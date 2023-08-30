@@ -3,7 +3,6 @@ part of voronoi;
 class HalfEdge {
   HalfEdge? edgeListLeftNeighbor;
   HalfEdge? edgeListRightNeighbor;
-  HalfEdge? nextInPriorityQueue;
 
   Edge? edge;
   Direction direction;
@@ -11,6 +10,9 @@ class HalfEdge {
 
   // the vertex's y-coordinate in the transformed Voronoi space V*
   num yStar = 0;
+
+  /// The point used in sorting HalfEdges in the main SplayTreeMap used in Fortune's algorithm.
+  Point<num> get hashPoint => Point<num>(vertex?.x ?? 0, yStar);
 
   HalfEdge(this.edge, this.direction);
 
