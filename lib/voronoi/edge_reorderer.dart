@@ -10,14 +10,7 @@ class EdgeReorderer<T extends Point<num>> {
 
   EdgeReorderer(List<Edge> origEdges) {
     if (origEdges.isNotEmpty) {
-      switch (T) {
-        case const (Site<num>):
-          _edges = reorderEdges(origEdges);
-          break;
-        case const (Vertex<num>):
-          _edges = reorderEdges(origEdges);
-          break;
-      }
+      _edges = reorderEdges(origEdges);
     }
   }
 
@@ -37,12 +30,12 @@ class EdgeReorderer<T extends Point<num>> {
 
     switch (T) {
       case const (Site<num>):
-        firstPoint = edge.leftSite;
-        lastPoint = edge.rightSite;
+        firstPoint = edge.sites.left;
+        lastPoint = edge.sites.right;
         break;
       case const (Vertex<num>):
-        firstPoint = edge.vertices[Direction.left];
-        lastPoint = edge.vertices[Direction.right];
+        firstPoint = edge.vertices.left;
+        lastPoint = edge.vertices.right;
         if (firstPoint == Vertex.vertexAtInfinity || lastPoint == Vertex.vertexAtInfinity) {
           return <Edge>[];
         }
@@ -60,12 +53,12 @@ class EdgeReorderer<T extends Point<num>> {
         edge = origEdges[i];
         switch (T) {
           case const (Site<num>):
-            leftPoint = edge.leftSite;
-            rightPoint = edge.rightSite;
+            leftPoint = edge.sites.left;
+            rightPoint = edge.sites.right;
             break;
           case const (Vertex<num>):
-            leftPoint = edge.vertices[Direction.left];
-            rightPoint = edge.vertices[Direction.right];
+            leftPoint = edge.vertices.left;
+            rightPoint = edge.vertices.right;
             if (leftPoint == Vertex.vertexAtInfinity || rightPoint == Vertex.vertexAtInfinity) {
               return <Edge>[];
             }

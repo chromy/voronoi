@@ -28,10 +28,12 @@ part 'voronoi/edge.dart';
 part 'voronoi/edge_list.dart';
 part 'voronoi/edge_reorderer.dart';
 part 'voronoi/half_edge.dart';
+
+part 'voronoi/oriented_pair.dart';
+
 part 'voronoi/site.dart';
 part 'voronoi/site_list.dart';
 part 'voronoi/vertex.dart';
-part 'voronoi/vertex_pair.dart';
 
 class BitmapData {}
 
@@ -96,30 +98,26 @@ class Voronoi {
 
   Iterable<Circle> circles() => _sites.circles();
 
-  Iterable<LineSegment> voronoiBoundaryForSite(Point<num> coord) =>
+  Iterable<LineSegment<Point<num>>> voronoiBoundaryForSite(Point<num> coord) =>
       visibleLineSegments(selectEdgesForSitePoint(coord, _edges));
 
-  Iterable<LineSegment> delaunayLinesForSite(Point<num> coord) =>
+  Iterable<LineSegment<Point<num>>> delaunayLinesForSite(Point<num> coord) =>
       delaunayLinesForEdges(selectEdgesForSitePoint(coord, _edges));
 
-  Iterable<LineSegment> voronoiDiagram() => visibleLineSegments(_edges);
+  Iterable<LineSegment<Point<num>>> voronoiDiagram() => visibleLineSegments(_edges);
 
-  Iterable<LineSegment> delaunayTriangulation() => delaunayLinesForEdges(_edges);
+  Iterable<LineSegment<Point<num>>> delaunayTriangulation() => delaunayLinesForEdges(_edges);
 
-  Iterable<LineSegment> hull() => delaunayLinesForEdges(hullEdges());
+  Iterable<LineSegment<Point<num>>> hull() => delaunayLinesForEdges(hullEdges());
 
-  Iterable<LineSegment> delaunayLinesForEdges(Iterable<Edge> edges) => edges.map((Edge edge) => edge.delaunayLine());
+  Iterable<LineSegment<Point<num>>> delaunayLinesForEdges(Iterable<Edge> edges) =>
+      edges.map((Edge edge) => edge.delaunayLine());
 
   Iterable<Edge> selectEdgesForSitePoint(Point<num> coord, Iterable<Edge> edgesToTest) =>
-      edgesToTest.where((Edge edge) => edge.leftSite == coord || edge.rightSite == coord);
+      edgesToTest.where((Edge edge) => edge.sites.left == coord || edge.sites.right == coord);
 
-  Iterable<LineSegment> visibleLineSegments(Iterable<Edge> edges) => edges.map((Edge edge) {
-        if (edge.visible) {
-          final Point<num> p1 = edge.clippedEnds[Direction.left]!;
-          final Point<num> p2 = edge.clippedEnds[Direction.right]!;
-          return LineSegment(p1, p2);
-        }
-      }).whereType<LineSegment>();
+  Iterable<LineSegment<Point<num>>> visibleLineSegments(Iterable<Edge> edges) =>
+      edges.map((Edge edge) => edge.voronoiEdge()).whereType<LineSegment<Point<num>>>();
 
   Iterable<Edge> hullEdges() => _edges.where((Edge edge) => edge.isPartOfConvexHull());
 
@@ -142,7 +140,7 @@ class Voronoi {
       final Edge edge = theHullEdges[i];
       direction = orientations[i];
 
-      final Site<num>? site = edge.site(direction);
+      final Site<num>? site = edge.sites[direction];
       if (site != null) {
         points.add(site);
       }
@@ -175,7 +173,7 @@ class Voronoi {
       if (edge == null) {
         return bottomMostSite;
       }
-      return edge.site(he.direction);
+      return edge.sites[he.direction];
     }
 
     Site<num>? rightRegion(HalfEdge he) {
@@ -183,7 +181,7 @@ class Voronoi {
       if (edge == null) {
         return bottomMostSite;
       }
-      return edge.site(he.direction.other);
+      return edge.sites[he.direction.other];
     }
 
     for (;;) {

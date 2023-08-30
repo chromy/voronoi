@@ -30,7 +30,7 @@ class HalfEdge {
     bool rightOfSite, above, fast;
     num dxP, dyP, dxS, t1, t2, t3, yl;
 
-    topSite = edge!.rightSite;
+    topSite = edge!.sites.right;
     rightOfSite = point.x > topSite.x;
 
     if (rightOfSite && direction == Direction.left) {
@@ -58,9 +58,8 @@ class HalfEdge {
         }
       }
       if (!fast) {
-        dxS = topSite.x - edge!.leftSite.x;
-        above = edge!.b * (dxP * dxP - dyP * dyP) <
-            dxS * dyP * (1.0 + 2.0 * dxP / dxS + edge!.b * edge!.b);
+        dxS = topSite.x - edge!.sites.left.x;
+        above = edge!.b * (dxP * dxP - dyP * dyP) < dxS * dyP * (1.0 + 2.0 * dxP / dxS + edge!.b * edge!.b);
         if (edge!.b < 0.0) {
           above = !above;
         }

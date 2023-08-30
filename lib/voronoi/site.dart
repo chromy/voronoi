@@ -44,11 +44,11 @@ class Site<T extends num> extends Point<T> {
   }
 
   Site<num>? neighborSite(Edge edge) {
-    if (this == edge.leftSite) {
-      return edge.rightSite;
+    if (this == edge.sites.left) {
+      return edge.sites.right;
     }
-    if (this == edge.rightSite) {
-      return edge.leftSite;
+    if (this == edge.sites.right) {
+      return edge.sites.left;
     }
     return null;
   }

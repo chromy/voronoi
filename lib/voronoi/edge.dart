@@ -6,15 +6,16 @@ class Edge {
   static final Edge deleted = Edge();
 
   // the two input Sites for which this Edge is a bisector:
-  late Site<num> leftSite;
-  late Site<num> rightSite;
+  late OrientedPair<Site<num>> sites;
 
   // the two Voronoi vertices that the edge connects (if one of them is null, the edge extends to infinity)
-  VertexPair<Vertex<num>?> vertices = VertexPair<Vertex<num>?>(null, null);
+  OrientedPair<Vertex<num>?> vertices = OrientedPair<Vertex<num>?>(null, null);
 
-  VertexPair<Point<num>?> _clippedVertices = VertexPair<Point<num>?>(null, null);
-  Point<num>? get leftClippedEnd => _clippedVertices[Direction.left];
-  Point<num>? get rightClippedEnd => _clippedVertices[Direction.right];
+  OrientedPair<Point<num>?> _clippedVertices = OrientedPair<Point<num>?>(null, null);
+
+  Point<num>? get leftClippedEnd => _clippedVertices.left;
+
+  Point<num>? get rightClippedEnd => _clippedVertices.right;
 
   // the equation of the edge: ax + by = c
   late num a, b, c;
@@ -42,13 +43,12 @@ class Edge {
     }
 
     final Edge edge = Edge()
-      ..leftSite = site0
-      ..rightSite = site1
-      ..vertices[Direction.both] = null
+      ..sites = OrientedPair<Site<num>>(site0, site1)
+      ..vertices.both = null
       ..a = a
       ..b = b
       ..c = c
-      .._clippedVertices[Direction.both] = null;
+      .._clippedVertices.both = null;
 
     site0.addEdge(edge);
     site1.addEdge(edge);
@@ -57,34 +57,21 @@ class Edge {
   }
 
   // draw a line connecting the input Sites for which the edge is a bisector:
-  LineSegment delaunayLine() => LineSegment(leftSite, rightSite);
+  LineSegment<Point<num>> delaunayLine() => LineSegment<Point<num>>.fromOrientedPair(sites);
 
-  LineSegment? voronoiEdge() {
-    // Return null if the edge isn't visible
-    if (!visible) {
-      return null;
-    } else {
-      return LineSegment(_clippedVertices[Direction.left]!, _clippedVertices[Direction.right]!);
-    }
-  }
-
-  Site<num>? site(Direction direction) {
-    if (direction == Direction.none) {
-      return null;
-    }
-
-    return (direction == Direction.left) ? leftSite : rightSite;
-  }
+  // Return a LineSegment representing the edge, or null if the edge isn't visible
+  LineSegment<Point<num>>? voronoiEdge() =>
+      visible ? LineSegment<Point<num>>.fromOrientedPair(_clippedVertices as OrientedPair<Vertex<num>>) : null;
 
   bool isPartOfConvexHull() => !vertices.isDefined(Direction.both);
 
-  num sitesDistance() => leftSite.distanceTo(rightSite);
+  num sitesDistance() => sites.left.distanceTo(sites.right);
 
   static int compareSitesDistances(Edge e1, Edge e2) => e1.sitesDistance().compareTo(e2.sitesDistance());
 
   // Once clipVertices() is called, this object will hold two Points
   // representing the clipped coordinates of the left and right ends...
-  VertexPair<Point<num>?> get clippedEnds => _clippedVertices;
+  OrientedPair<Point<num>?> get clippedEnds => _clippedVertices;
 
   // The only edges that should be visible are those whose clipped vertices are both non-null.
   bool get visible => !_clippedVertices.isDefined(Direction.none);
@@ -102,14 +89,14 @@ class Edge {
     Vertex<num>? vertex0, vertex1;
     num x0, x1, y0, y1;
 
-    _clippedVertices = VertexPair<Point<num>?>(null, null);
+    _clippedVertices = OrientedPair<Point<num>?>(null, null);
 
     if (a == 1.0 && b >= 0.0) {
-      vertex0 = vertices[Direction.right];
-      vertex1 = vertices[Direction.left];
+      vertex0 = vertices.right;
+      vertex1 = vertices.left;
     } else {
-      vertex0 = vertices[Direction.left];
-      vertex1 = vertices[Direction.right];
+      vertex0 = vertices.left;
+      vertex1 = vertices.right;
     }
 
     if (a == 1.0) {
@@ -190,12 +177,14 @@ class Edge {
       }
     }
 
-    if (vertex0 == vertices[Direction.left]) {
-      _clippedVertices[Direction.left] = Point<num>(x0, y0);
-      _clippedVertices[Direction.right] = Point<num>(x1, y1);
+    if (vertex0 == vertices.left) {
+      _clippedVertices
+        ..left = Point<num>(x0, y0)
+        ..right = Point<num>(x1, y1);
     } else {
-      _clippedVertices[Direction.right] = Point<num>(x0, y0);
-      _clippedVertices[Direction.left] = Point<num>(x1, y1);
+      _clippedVertices
+        ..right = Point<num>(x0, y0)
+        ..left = Point<num>(x1, y1);
     }
   }
 }

@@ -1,10 +1,12 @@
 part of voronoi;
 
-class VertexPair<T extends Point<num>?> {
+class OrientedPair<T> {
   T left;
   T right;
 
-  VertexPair(this.left, this.right);
+  OrientedPair(this.left, this.right);
+
+  OrientedPair<T> reverse() => OrientedPair<T>(this.right, this.left);
 
   T? operator [](Direction direction) {
     switch (direction) {
@@ -18,22 +20,26 @@ class VertexPair<T extends Point<num>?> {
     }
   }
 
-  void operator []=(Direction direction, T newVertex) {
+  void operator []=(Direction direction, T newValue) {
     switch (direction) {
       case Direction.left:
-        left = newVertex;
+        left = newValue;
         break;
       case Direction.right:
-        right = newVertex;
+        right = newValue;
         break;
       case Direction.both:
-        left = newVertex;
-        right = newVertex;
+        left = newValue;
+        right = newValue;
         break;
       case Direction.none:
-        throw ArgumentError("Can not set the vertex for the Direction.none direction.");
+        throw ArgumentError("Can not set a value for the Direction.none direction.");
     }
   }
+
+  /// Syntactical sugar for setting both values at once.
+  // ignore: avoid_setters_without_getters
+  set both(T newValue) => this[Direction.both] = newValue;
 
   bool isDefined(Direction direction) {
     switch (direction) {

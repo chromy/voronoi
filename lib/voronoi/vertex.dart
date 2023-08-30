@@ -28,7 +28,7 @@ class Vertex<T extends num> extends Point<T> {
     edge0 = halfEdge0.edge;
     edge1 = halfEdge1.edge;
 
-    if (edge0 == null || edge1 == null || edge0.rightSite == edge1.rightSite) {
+    if (edge0 == null || edge1 == null || edge0.sites.right == edge1.sites.right) {
       return null;
     }
 
@@ -41,14 +41,14 @@ class Vertex<T extends num> extends Point<T> {
     intersectionX = (edge0.c * edge1.b - edge1.c * edge0.b) / determinant;
     intersectionY = (edge1.c * edge0.a - edge0.c * edge1.a) / determinant;
 
-    if (edge0.rightSite.compareTo(edge1.rightSite) < 0) {
+    if (edge0.sites.right.compareTo(edge1.sites.right) < 0) {
       halfEdge = halfEdge0;
       edge = edge0;
     } else {
       halfEdge = halfEdge1;
       edge = edge1;
     }
-    rightOfSite = intersectionX >= edge.rightSite.x;
+    rightOfSite = intersectionX >= edge.sites.right.x;
     if ((rightOfSite && halfEdge.direction == Direction.left) ||
         (!rightOfSite && halfEdge.direction == Direction.right)) {
       return null;
