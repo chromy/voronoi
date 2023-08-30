@@ -1,9 +1,6 @@
 part of voronoi;
 
 class Site<T extends num> extends Point<T> {
-
-  num weight;
-
   // the edges that define this Site's Voronoi region:
   List<Edge> _edges = <Edge>[];
 
@@ -15,7 +12,7 @@ class Site<T extends num> extends Point<T> {
   // ordered list of points that define the region clipped to bounds:
   List<Point<num>>? _region;
 
-  Site(super.x, super.y, this.weight);
+  Site(super.x, super.y);
 
   void addEdge(Edge edge) {
     _edges.add(edge);
@@ -69,8 +66,8 @@ class Site<T extends num> extends Point<T> {
 
   void reorderEdges() {
     final EdgeReorderer<Vertex<num>> reorderer = EdgeReorderer<Vertex<num>>(_edges);
-    _edges = reorderer.edges;
-    _edgeOrientations = reorderer.edgeOrientations;
+    _edges = reorderer.edges.toList();
+    _edgeOrientations = reorderer.edgeOrientations.toList();
   }
 
   List<Point<num>> clipToBounds(math.Rectangle<num> bounds) {
@@ -89,8 +86,8 @@ class Site<T extends num> extends Point<T> {
     edge = _edges[i];
     final Direction direction = _edgeOrientations![i];
     points
-      ..add(edge.clippedEnds[direction]!)
-      ..add(edge.clippedEnds[direction.other]!);
+      ..add(edge.clippedVertices[direction]!)
+      ..add(edge.clippedVertices[direction.other]!);
 
     for (int j = i + 1; j < n; ++j) {
       edge = _edges[j];
@@ -110,7 +107,7 @@ class Site<T extends num> extends Point<T> {
     final Edge newEdge = _edges[j];
     final Direction newOrientation = _edgeOrientations![j];
     // the point that  must be connected to rightPoint:
-    final Point<num> newPoint = newEdge.clippedEnds[newOrientation]!;
+    final Point<num> newPoint = newEdge.clippedVertices[newOrientation]!;
     if (rightPoint != newPoint) {
       // The points do not coincide, so they must have been clipped at the bounds;
       // see if they are on the same border of the bounds:
@@ -192,8 +189,7 @@ class Site<T extends num> extends Point<T> {
               px = bounds.right;
             }
             points
-              ..add(Point<num>(px, py))
-              ..add(Point<num>(px, bounds.top));
+              ..add(Point<num>(px, py))..add(Point<num>(px, bounds.top));
           }
         }
       }
@@ -203,7 +199,7 @@ class Site<T extends num> extends Point<T> {
       }
       points.add(newPoint);
     }
-    final Point<num> newRightPoint = newEdge.clippedEnds[newOrientation.other]!;
+    final Point<num> newRightPoint = newEdge.clippedVertices[newOrientation.other]!;
     if (points[0] != newRightPoint) {
       points.add(newRightPoint);
     }

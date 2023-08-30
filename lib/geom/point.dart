@@ -12,6 +12,8 @@ class Point<T extends num> extends math.Point<T> implements Comparable<Point<T>>
 
   const Point(super.x, super.y);
 
+  Point.fromMathPoint(math.Point<T> point) : super(point.x, point.y);
+
   @override
   int compareTo(Point<T> other) => this.hashCode - other.hashCode;
 

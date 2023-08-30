@@ -28,8 +28,7 @@ class SiteList<T extends num> extends ListBase<Site<T>> {
 
   Site<T>? next() {
     if (!_sorted) {
-      //"SiteList::next():  sites have not been sorted"
-      throw Error();
+      throw StateError("Cannot call next() on an unsorted SiteList.");
     }
     if (_currentIndex < length) {
       return this[_currentIndex++];
@@ -39,28 +38,22 @@ class SiteList<T extends num> extends ListBase<Site<T>> {
   }
 
   math.Rectangle<num> getSitesBounds() {
+    if (isEmpty) {
+      return const math.Rectangle<int>(0, 0, 0, 0);
+    }
+
     if (!_sorted) {
       sort();
       _currentIndex = 0;
       _sorted = true;
     }
-    num xMin, xMax, yMin, yMax;
-    if (isEmpty) {
-      return const math.Rectangle<int>(0, 0, 0, 0);
-    }
-    xMin = double.maxFinite;
-    xMax = double.negativeInfinity;
-    for (final Site<T> site in this) {
-      if (site.x < xMin) {
-        xMin = site.x;
-      }
-      if (site.x > xMax) {
-        xMax = site.x;
-      }
-    }
+
+    final num xMin = reduce((Site<T> minSite, Site<T> site) => site.x < minSite.x ? site : minSite).x;
+    final num xMax = reduce((Site<T> maxSite, Site<T> site) => site.x > maxSite.x ? site : maxSite).x;
+
     // here's where we assume that the sites have been sorted on y:
-    yMin = this[0].y;
-    yMax = this[length - 1].y;
+    final num yMin = this[0].y;
+    final num yMax = this[length - 1].y;
 
     return math.Rectangle<num>(xMin, yMin, xMax - xMin, yMax - yMin);
   }
@@ -68,12 +61,12 @@ class SiteList<T extends num> extends ListBase<Site<T>> {
   /// @return the largest circle centered at each site that fits in its region;
   /// if the region is infinite, return no circle for that region.
   Iterable<Circle> circles() => map((Site<T> site) {
-      final Edge nearestEdge = site.nearestEdge();
-      if (!nearestEdge.isPartOfConvexHull()) {
-        final num radius = nearestEdge.sitesDistance() * 0.5;
-        return Circle(site, radius);
-      }
-  }).whereType<Circle>();
+        final Edge nearestEdge = site.nearestEdge();
+        if (!nearestEdge.isPartOfConvexHull()) {
+          final num radius = nearestEdge.sitesDistance() * 0.5;
+          return Circle(site, radius);
+        }
+      }).whereType<Circle>();
 
   Iterable<List<Point<num>>> regions(math.Rectangle<num> plotBounds) => map((Site<T> site) => site.region(plotBounds));
 }

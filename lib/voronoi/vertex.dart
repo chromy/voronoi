@@ -1,60 +1,54 @@
 part of voronoi;
 
 class Vertex<T extends num> extends Point<T> {
-  static final Vertex<double> vertexAtInfinity = Vertex<double>(double.nan, double.nan);
+  static final Vertex<double> vertexAtInfinity = Vertex<double>(double.infinity, double.infinity);
   static int _vertexCount = 0;
 
   int _vertexIndex = 0;
 
   Vertex(super.x, super.y);
 
-  static Vertex<num> create<T extends num>(T x, T y) {
-    if (x.isNaN || y.isNaN) {
-      return vertexAtInfinity;
-    }
-
-    return Vertex<T>(x, y);
-  }
-
   @override
   String toString() => "Vertex($x, $y)";
 
   static Vertex<num>? intersect(HalfEdge halfEdge0, HalfEdge halfEdge1) {
-    Edge? edge0, edge1, edge;
-    HalfEdge halfEdge;
-    num determinant, intersectionX, intersectionY;
-    bool rightOfSite;
-
-    edge0 = halfEdge0.edge;
-    edge1 = halfEdge1.edge;
+    final Edge? edge0 = halfEdge0.edge;
+    final Edge? edge1 = halfEdge1.edge;
 
     if (edge0 == null || edge1 == null || edge0.sites.right == edge1.sites.right) {
       return null;
     }
 
-    determinant = edge0.a * edge1.b - edge0.b * edge1.a;
-    if (-1.0e-10 < determinant && determinant < 1.0e-10) {
+    final num determinant = edge0.equation.a * edge1.equation.b - edge0.equation.b * edge1.equation.a;
+    if (determinant.abs() < 1.0e-10) {
       // the edges are parallel
       return null;
     }
 
-    intersectionX = (edge0.c * edge1.b - edge1.c * edge0.b) / determinant;
-    intersectionY = (edge1.c * edge0.a - edge0.c * edge1.a) / determinant;
+    final Point<num> intersection = Point<num>(
+        (edge0.equation.c * edge1.equation.b - edge1.equation.c * edge0.equation.b) / determinant,
+        (edge1.equation.c * edge0.equation.a - edge0.equation.c * edge1.equation.a) / determinant);
 
-    if (edge0.sites.right.compareTo(edge1.sites.right) < 0) {
-      halfEdge = halfEdge0;
-      edge = edge0;
-    } else {
-      halfEdge = halfEdge1;
-      edge = edge1;
-    }
-    rightOfSite = intersectionX >= edge.sites.right.x;
-    if ((rightOfSite && halfEdge.direction == Direction.left) ||
-        (!rightOfSite && halfEdge.direction == Direction.right)) {
+    if (intersection.x.isNaN || intersection.y.isNaN) {
       return null;
     }
 
-    return Vertex.create(intersectionX, intersectionY);
+    Edge? edge;
+    Direction direction;
+    if (edge0.sites.right.compareTo(edge1.sites.right) < 0) {
+      direction = halfEdge0.direction;
+      edge = edge0;
+    } else {
+      direction = halfEdge1.direction;
+      edge = edge1;
+    }
+
+    final bool rightOfSite = intersection.x >= edge.sites.right.x;
+    if ((rightOfSite && direction == Direction.left) || (!rightOfSite && direction == Direction.right)) {
+      return null;
+    }
+
+    return Vertex<num>(intersection.x, intersection.y);
   }
 
   int get vertexIndex => _vertexIndex;

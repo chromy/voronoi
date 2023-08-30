@@ -1,7 +1,10 @@
 part of voronoi;
 
 enum Direction {
-  left, right, none, both;
+  left,
+  right,
+  none,
+  both;
 
   Direction get other {
     switch (this) {

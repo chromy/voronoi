@@ -26,12 +26,10 @@ class HalfEdge {
       throw ArgumentError.notNull("Halfedge.edge");
     }
 
-    Site<num> topSite;
-    bool rightOfSite, above, fast;
-    num dxP, dyP, dxS, t1, t2, t3, yl;
+    bool above;
 
-    topSite = edge!.sites.right;
-    rightOfSite = point.x > topSite.x;
+    final Site<num> topSite = edge!.sites.right;
+    final bool rightOfSite = point.x > topSite.x;
 
     if (rightOfSite && direction == Direction.left) {
       return true;
@@ -41,16 +39,18 @@ class HalfEdge {
       return false;
     }
 
-    if (edge!.a == 1.0) {
+    if (edge!.equation.a == 1) {
+      bool fast = false;
+      num dxP, dyP, dxS;
+
       dyP = point.y - topSite.y;
       dxP = point.x - topSite.x;
-      fast = false;
-      if ((!rightOfSite && edge!.b < 0.0) || (rightOfSite && edge!.b >= 0.0)) {
-        above = dyP >= edge!.b * dxP;
+      if ((!rightOfSite && edge!.equation.b < 0) || (rightOfSite && edge!.equation.b >= 0)) {
+        above = dyP >= edge!.equation.b * dxP;
         fast = above;
       } else {
-        above = point.x + point.y * edge!.b > edge!.c;
-        if (edge!.b < 0.0) {
+        above = point.x + point.y * edge!.equation.b > edge!.equation.c;
+        if (edge!.equation.b < 0) {
           above = !above;
         }
         if (!above) {
@@ -59,18 +59,20 @@ class HalfEdge {
       }
       if (!fast) {
         dxS = topSite.x - edge!.sites.left.x;
-        above = edge!.b * (dxP * dxP - dyP * dyP) < dxS * dyP * (1.0 + 2.0 * dxP / dxS + edge!.b * edge!.b);
-        if (edge!.b < 0.0) {
+        above = edge!.equation.b * (dxP * dxP - dyP * dyP) <
+            dxS * dyP * (1 + 2 * dxP / dxS + edge!.equation.b * edge!.equation.b);
+        if (edge!.equation.b < 0) {
           above = !above;
         }
       }
     } else /* edge.b == 1.0 */ {
-      yl = edge!.c - edge!.a * point.x;
-      t1 = point.y - yl;
-      t2 = point.x - topSite.x;
-      t3 = yl - topSite.y;
+      final num yl = edge!.equation.c - edge!.equation.a * point.x;
+      final num t1 = point.y - yl;
+      final num t2 = point.x - topSite.x;
+      final num t3 = yl - topSite.y;
       above = t1 * t1 > t2 * t2 + t3 * t3;
     }
+
     return direction == Direction.left ? above : !above;
   }
 }

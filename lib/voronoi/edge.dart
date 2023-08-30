@@ -13,42 +13,31 @@ class Edge {
 
   OrientedPair<Point<num>?> _clippedVertices = OrientedPair<Point<num>?>(null, null);
 
-  Point<num>? get leftClippedEnd => _clippedVertices.left;
-
-  Point<num>? get rightClippedEnd => _clippedVertices.right;
+  OrientedPair<Point<num>?> get clippedVertices => _clippedVertices;
 
   // the equation of the edge: ax + by = c
-  late num a, b, c;
+  late ({num a, num b, num c}) equation;
 
   Edge();
 
   /// This is the only way to create a new Edge
   factory Edge.createBisectingEdge(Site<num> site0, Site<num> site1) {
-    num dx, dy, absDx, absDy;
-    num a, b, c;
+    ({num a, num b, num c}) equation;
 
-    dx = site1.x - site0.x;
-    dy = site1.y - site0.y;
-    absDx = dx > 0 ? dx : -dx;
-    absDy = dy > 0 ? dy : -dy;
-    c = site0.x * dx + site0.y * dy + (dx * dx + dy * dy) * 0.5;
-    if (absDx > absDy) {
-      a = 1.0;
-      b = dy / dx;
-      c /= dx;
+    final num dx = site1.x - site0.x;
+    final num dy = site1.y - site0.y;
+    final num c = site0.x * dx + site0.y * dy + (dx * dx + dy * dy) * 0.5;
+    if (dx.abs() > dy.abs()) {
+      equation = (a: 1, b: dy / dx, c: c / dx);
     } else {
-      b = 1.0;
-      a = dx / dy;
-      c /= dy;
+      equation = (a: dx / dy, b: 1, c: c / dy);
     }
 
     final Edge edge = Edge()
       ..sites = OrientedPair<Site<num>>(site0, site1)
       ..vertices.both = null
-      ..a = a
-      ..b = b
-      ..c = c
-      .._clippedVertices.both = null;
+      .._clippedVertices.both = null
+      ..equation = equation;
 
     site0.addEdge(edge);
     site1.addEdge(edge);
@@ -69,17 +58,11 @@ class Edge {
 
   static int compareSitesDistances(Edge e1, Edge e2) => e1.sitesDistance().compareTo(e2.sitesDistance());
 
-  // Once clipVertices() is called, this object will hold two Points
-  // representing the clipped coordinates of the left and right ends...
-  OrientedPair<Point<num>?> get clippedEnds => _clippedVertices;
-
   // The only edges that should be visible are those whose clipped vertices are both non-null.
   bool get visible => !_clippedVertices.isDefined(Direction.none);
 
   /// Set _clippedVertices to contain the two ends of the portion of the Voronoi edge that is visible
   /// within the bounds.  If no part of the Edge falls within the bounds, leave _clippedVertices null.
-  /// @param bounds
-  ///
   void clipVertices(math.Rectangle<num> bounds) {
     final num xMin = bounds.left;
     final num yMin = bounds.top;
@@ -87,11 +70,8 @@ class Edge {
     final num yMax = bounds.bottom;
 
     Vertex<num>? vertex0, vertex1;
-    num x0, x1, y0, y1;
 
-    _clippedVertices = OrientedPair<Point<num>?>(null, null);
-
-    if (a == 1.0 && b >= 0.0) {
+    if (equation.a == 1.0 && equation.b >= 0.0) {
       vertex0 = vertices.right;
       vertex1 = vertices.left;
     } else {
@@ -99,7 +79,8 @@ class Edge {
       vertex1 = vertices.right;
     }
 
-    if (a == 1.0) {
+    num x0, x1, y0, y1;
+    if (equation.a == 1.0) {
       y0 = yMin;
       if (vertex0 != null && vertex0.y > yMin) {
         y0 = vertex0.y;
@@ -107,7 +88,7 @@ class Edge {
       if (y0 > yMax) {
         return;
       }
-      x0 = c - b * y0;
+      x0 = equation.c - equation.b * y0;
 
       y1 = yMax;
       if (vertex1 != null && vertex1.y < yMax) {
@@ -116,7 +97,7 @@ class Edge {
       if (y1 < yMin) {
         return;
       }
-      x1 = c - b * y1;
+      x1 = equation.c - equation.b * y1;
 
       if ((x0 > xMax && x1 > xMax) || (x0 < xMin && x1 < xMin)) {
         return;
@@ -124,18 +105,18 @@ class Edge {
 
       if (x0 > xMax) {
         x0 = xMax;
-        y0 = (c - x0) / b;
+        y0 = (equation.c - x0) / equation.b;
       } else if (x0 < xMin) {
         x0 = xMin;
-        y0 = (c - x0) / b;
+        y0 = (equation.c - x0) / equation.b;
       }
 
       if (x1 > xMax) {
         x1 = xMax;
-        y1 = (c - x1) / b;
+        y1 = (equation.c - x1) / equation.b;
       } else if (x1 < xMin) {
         x1 = xMin;
-        y1 = (c - x1) / b;
+        y1 = (equation.c - x1) / equation.b;
       }
     } else {
       x0 = xMin;
@@ -145,7 +126,7 @@ class Edge {
       if (x0 > xMax) {
         return;
       }
-      y0 = c - a * x0;
+      y0 = equation.c - equation.a * x0;
 
       x1 = xMax;
       if (vertex1 != null && vertex1.x < xMax) {
@@ -154,7 +135,7 @@ class Edge {
       if (x1 < xMin) {
         return;
       }
-      y1 = c - a * x1;
+      y1 = equation.c - equation.a * x1;
 
       if ((y0 > yMax && y1 > yMax) || (y0 < yMin && y1 < yMin)) {
         return;
@@ -162,20 +143,22 @@ class Edge {
 
       if (y0 > yMax) {
         y0 = yMax;
-        x0 = (c - y0) / a;
+        x0 = (equation.c - y0) / equation.a;
       } else if (y0 < yMin) {
         y0 = yMin;
-        x0 = (c - y0) / a;
+        x0 = (equation.c - y0) / equation.a;
       }
 
       if (y1 > yMax) {
         y1 = yMax;
-        x1 = (c - y1) / a;
+        x1 = (equation.c - y1) / equation.a;
       } else if (y1 < yMin) {
         y1 = yMin;
-        x1 = (c - y1) / a;
+        x1 = (equation.c - y1) / equation.a;
       }
     }
+
+    _clippedVertices = OrientedPair<Point<num>?>(null, null);
 
     if (vertex0 == vertices.left) {
       _clippedVertices

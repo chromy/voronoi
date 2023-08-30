@@ -8,9 +8,11 @@ class EdgeList extends ListBase<HalfEdge?> {
   late List<HalfEdge?> _hash;
 
   late HalfEdge _leftEnd;
+
   HalfEdge get leftEnd => _leftEnd;
 
   late HalfEdge _rightEnd;
+
   HalfEdge get rightEnd => _rightEnd;
 
   EdgeList(this._xMin, this._deltaX, int sqrtNSites) {
@@ -23,10 +25,12 @@ class EdgeList extends ListBase<HalfEdge?> {
     // two dummy HalfEdges:
     _leftEnd = HalfEdge.createDummy();
     _rightEnd = HalfEdge.createDummy();
-    _leftEnd..edgeListLeftNeighbor = null
-    ..edgeListRightNeighbor = _rightEnd;
-    _rightEnd..edgeListLeftNeighbor = _leftEnd
-    ..edgeListRightNeighbor = null;
+    _leftEnd
+      ..edgeListLeftNeighbor = null
+      ..edgeListRightNeighbor = _rightEnd;
+    _rightEnd
+      ..edgeListLeftNeighbor = _leftEnd
+      ..edgeListRightNeighbor = null;
     this[0] = _leftEnd;
     this[_hashSize - 1] = _rightEnd;
   }
@@ -45,8 +49,9 @@ class EdgeList extends ListBase<HalfEdge?> {
 
   /// Insert newHalfEdge to the right of a given other edge.
   void insertToRightOfHalfEdge(HalfEdge leftNeighbor, HalfEdge newHalfEdge) {
-    newHalfEdge..edgeListLeftNeighbor = leftNeighbor
-    ..edgeListRightNeighbor = leftNeighbor.edgeListRightNeighbor;
+    newHalfEdge
+      ..edgeListLeftNeighbor = leftNeighbor
+      ..edgeListRightNeighbor = leftNeighbor.edgeListRightNeighbor;
     leftNeighbor.edgeListRightNeighbor!.edgeListLeftNeighbor = newHalfEdge;
     leftNeighbor.edgeListRightNeighbor = newHalfEdge;
   }
@@ -61,28 +66,26 @@ class EdgeList extends ListBase<HalfEdge?> {
 
     halfEdge.edgeListLeftNeighbor!.edgeListRightNeighbor = halfEdge.edgeListRightNeighbor;
     halfEdge.edgeListRightNeighbor!.edgeListLeftNeighbor = halfEdge.edgeListLeftNeighbor;
-    halfEdge..edge = Edge.deleted
-    ..edgeListLeftNeighbor = halfEdge.edgeListRightNeighbor = null;
+    halfEdge
+      ..edge = Edge.deleted
+      ..edgeListLeftNeighbor = halfEdge.edgeListRightNeighbor = null;
 
     return true;
   }
 
   /// Find the rightmost HalfEdge that is still left of the given point.
   HalfEdge edgeListLeftNeighbor(Point<num> point) {
-    int bucket;
-    HalfEdge? halfEdge;
-
     /* Use hash table to get close to desired halfEdge */
-    bucket = ((point.x - _xMin) / _deltaX * _hashSize).round();
+    int bucket = ((point.x - _xMin) / _deltaX * _hashSize).round();
     if (bucket < 0) {
       bucket = 0;
     }
     if (bucket >= _hashSize) {
       bucket = _hashSize - 1;
     }
-    halfEdge = getHash(bucket);
+    HalfEdge? halfEdge = getHash(bucket);
     if (halfEdge == null) {
-      for (int i = 1; i<_hashSize; ++i) {
+      for (int i = 1; i < _hashSize; ++i) {
         if ((halfEdge = getHash(bucket - i)) != null) {
           break;
         }

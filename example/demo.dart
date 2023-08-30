@@ -39,8 +39,6 @@ class VoronoiDemo {
 
   late Voronoi voronoi;
 
-  num renderTime = 0;
-
   VoronoiDemo(this.canvas, this.sites, this.seed);
 
   // Initialize the diagram.
@@ -49,7 +47,7 @@ class VoronoiDemo {
     final math.Rectangle<num> rect = canvas.parent!.client;
     width = rect.width;
     height = rect.height;
-    canvas.width = width as int?;
+    canvas.width = width.toInt();
 
     // Compute diagram.
     recompute();
@@ -105,19 +103,16 @@ class VoronoiDemo {
 
     for (final Edge edge in edges) {
       // Create gradient
-      final CanvasGradient lingrad = context.createLinearGradient(
-          edge.leftClippedEnd!.x,
-          edge.leftClippedEnd!.y,
-          edge.rightClippedEnd!.x,
-          edge.rightClippedEnd!.y)
+      final CanvasGradient lingrad = context.createLinearGradient(edge.clippedVertices.left!.x,
+          edge.clippedVertices.left!.y, edge.clippedVertices.right!.x, edge.clippedVertices.right!.y)
         ..addColorStop(0, '#f00')..addColorStop(1, '#0f0');
 
       context
         ..strokeStyle = lingrad
         ..lineWidth = 1
         ..beginPath()
-        ..moveTo(edge.leftClippedEnd!.x, edge.leftClippedEnd!.y)
-        ..lineTo(edge.rightClippedEnd!.x, edge.rightClippedEnd!.y)
+        ..moveTo(edge.clippedVertices.left!.x, edge.clippedVertices.left!.y)
+        ..lineTo(edge.clippedVertices.right!.x, edge.clippedVertices.right!.y)
         ..stroke();
     }
   }
