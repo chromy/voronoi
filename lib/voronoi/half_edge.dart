@@ -11,8 +11,8 @@ class HalfEdge {
   // the vertex's y-coordinate in the transformed Voronoi space V*
   num yStar = 0;
 
-  /// The point used in sorting HalfEdges in the main SplayTreeMap used in Fortune's algorithm.
-  Point<num> get hashPoint => Point<num>(vertex?.x ?? 0, yStar);
+  /// The value used in sorting HalfEdges in the main SplayTreeMap used in Fortune's algorithm.
+  int get sortHash => Point.hashCoordinates<num>(vertex?.x ?? 0, yStar);
 
   HalfEdge(this.edge, this.direction);
 

@@ -162,7 +162,7 @@ class Voronoi {
     final math.Rectangle<num> dataBounds = _sites.getSitesBounds();
 
     final int sqrtNSites = math.sqrt(_sites.length + 4).round();
-    final SplayTreeMap<Point<num>, HalfEdge> heap = SplayTreeMap<Point<num>, HalfEdge>();
+    final SplayTreeMap<int, HalfEdge> heap = SplayTreeMap<int, HalfEdge>();
     final EdgeList edgeList = EdgeList(dataBounds.left, dataBounds.width, sqrtNSites);
     final List<HalfEdge> halfEdges = <HalfEdge>[];
     final List<Vertex<num>> vertices = <Vertex<num>>[];
@@ -187,7 +187,7 @@ class Voronoi {
     }
 
     for (;;) {
-      if (newSite != null && (heap.isEmpty || newSite.compareTo(heap.firstKey()!) < 0)) {
+      if (newSite != null && (heap.isEmpty || newSite.hashCode.compareTo(heap.firstKey()!) < 0)) {
         /* new site is smallest */
 
         // Step 8:
@@ -210,11 +210,11 @@ class Voronoi {
         // first half of Step 11:
         if ((vertex = Vertex.intersect(bisector, lbnd)) != null) {
           vertices.add(vertex!);
-          heap.remove(lbnd.hashPoint);
+          heap.remove(lbnd.sortHash);
           lbnd
             ..vertex = vertex
             ..yStar = vertex.y + newSite.distanceTo(vertex);
-          heap[lbnd.hashPoint] = lbnd;
+          heap[lbnd.sortHash] = lbnd;
         }
 
         lbnd = bisector;
@@ -230,14 +230,14 @@ class Voronoi {
           bisector
             ..vertex = vertex
             ..yStar = vertex.y + newSite.distanceTo(vertex);
-          heap[bisector.hashPoint] = bisector;
+          heap[bisector.sortHash] = bisector;
         }
 
         newSite = _sites.next();
       } else if (heap.isNotEmpty) {
         /* intersection is smallest */
         lbnd = heap[heap.firstKey()]!;
-        heap.remove(lbnd.hashPoint);
+        heap.remove(lbnd.sortHash);
         llbnd = lbnd.edgeListLeftNeighbor!;
         rbnd = lbnd.edgeListRightNeighbor!;
         rrbnd = rbnd.edgeListRightNeighbor!;
@@ -251,7 +251,7 @@ class Voronoi {
         lbnd.edge!.vertices[lbnd.direction] = v;
         rbnd.edge!.vertices[rbnd.direction] = v;
         edgeList.remove(lbnd);
-        heap.remove(rbnd.hashPoint);
+        heap.remove(rbnd.sortHash);
         edgeList.remove(rbnd);
         direction = Direction.left;
         if (bottomSite!.y > topSite!.y) {
@@ -268,18 +268,18 @@ class Voronoi {
         edge.vertices[direction.other] = v;
         if ((vertex = Vertex.intersect(llbnd, bisector)) != null) {
           vertices.add(vertex!);
-          heap.remove(llbnd.hashPoint);
+          heap.remove(llbnd.sortHash);
           llbnd
             ..vertex = vertex
             ..yStar = vertex.y + bottomSite.distanceTo(vertex);
-          heap[llbnd.hashPoint] = llbnd;
+          heap[llbnd.sortHash] = llbnd;
         }
         if ((vertex = Vertex.intersect(bisector, rrbnd)) != null) {
           vertices.add(vertex!);
           bisector
             ..vertex = vertex
             ..yStar = vertex.y + bottomSite.distanceTo(vertex);
-          heap[bisector.hashPoint] = bisector;
+          heap[bisector.sortHash] = bisector;
         }
       } else {
         break;
