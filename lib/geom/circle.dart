@@ -1,15 +1,11 @@
 part of voronoi;
 
 class Circle {
-  Point center;
+  Point<num> center;
   num radius;
 
-  Circle(num centerX, num centerY, num radius) {
-    this.center = new Point(centerX, centerY);
-    this.radius = radius;
-  }
+  Circle(this.center, this.radius);
 
-  String toString() {
-    return "Circle (center: $center radius: $radius)";
-  }
+  @override
+  String toString() => "Circle (center: $center radius: $radius)";
 }

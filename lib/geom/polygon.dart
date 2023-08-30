@@ -1,38 +1,48 @@
 part of voronoi;
 
-class Polygon {
-  List<Point> vertices;
+class Polygon<T extends num> extends ListBase<Point<T>> {
+  final List<Point<T>> _vertices;
 
-  Polygon(List<Point> vertices) {
-    this.vertices = vertices;
-  }
+  Polygon(this._vertices);
 
   num get area => (signedDoubleArea() * 0.5).abs();
 
   Winding get winding {
-    num theSignedDoubleArea = signedDoubleArea();
+    final num theSignedDoubleArea = signedDoubleArea();
     if (theSignedDoubleArea < 0) {
-      return Winding.CLOCKWISE;
+      return Winding.clockwise;
     }
     if (theSignedDoubleArea > 0) {
-      return Winding.COUNTERCLOCKWISE;
+      return Winding.counterclockwise;
     }
-    return Winding.NONE;
+    return Winding.none;
   }
 
   num signedDoubleArea() {
     int index;
     int nextIndex;
-    int n = vertices.length;
-    Point point;
-    Point next;
+    final int n = length;
+    Point<num> point;
+    Point<num> next;
     num signedDoubleArea = 0;
     for (index = 0; index < n; ++index) {
       nextIndex = (index + 1) % n;
-      point = vertices[index];
-      next = vertices[nextIndex];
+      point = this[index];
+      next = this[nextIndex];
       signedDoubleArea += point.x * next.y - next.x * point.y;
     }
     return signedDoubleArea;
   }
+
+  @override
+  int get length => _vertices.length;
+
+  @override
+  set length(int newLength) => _vertices.length = newLength;
+
+  @override
+  Point<T> operator [](int index) => _vertices[index];
+
+  @override
+  void operator []=(int index, Point<T> value) => _vertices[index] = value;
 }

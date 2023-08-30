@@ -1,0 +1,185 @@
+linter:
+  rules:
+    ####DISABLED RULES
+    avoid_as: false
+    avoid_escaping_inner_quotes: false
+    comment_references: false
+    flutter_style_todos: false
+    lines_longer_than_80_chars: false #Effective
+    omit_local_variable_types: false #Effective #Pedantic
+    prefer_double_quotes: false
+    prefer_single_quotes: false #Pedantic
+    sort_constructors_first: false
+    unnecessary_final: false
+    avoid_equals_and_hash_code_on_mutable_classes: false #Effective
+
+
+    ####ERROR RULES
+    avoid_empty_else: true #Flutter #Pedantic
+    avoid_print: true
+    avoid_relative_lib_imports: true #Effective #Pedantic
+    avoid_returning_null_for_future: true
+    avoid_slow_async_io: true
+    avoid_types_as_parameter_names: true #Pedantic
+    close_sinks: true #Flutter
+    control_flow_in_finally: true #Flutter
+    diagnostic_describe_all_properties: true
+    empty_statements: true #Flutter
+    hash_and_equals: true #Effective #Flutter
+    collection_methods_unrelated_type: true
+    literal_only_boolean_expressions: true
+    no_adjacent_strings_in_list: true
+    no_duplicate_case_values: true #Pedantic
+    no_logic_in_create_state: true
+    prefer_relative_imports: true #Effective
+    prefer_void_to_null: true
+    test_types_in_equals: true #Flutter
+    throw_in_finally: true #Flutter
+    unnecessary_statements: true #Flutter
+    unrelated_type_equality_checks: true #Flutter #Pedantic
+    unsafe_html: true
+    valid_regexps: true #Pedantic
+
+
+    ####CODE STYLE RULES
+    always_declare_return_types: true #Pedantic
+    always_put_control_body_on_new_line: true
+    always_put_required_named_parameters_first: true
+    always_require_non_null_named_parameters: true #Pedantic
+    always_specify_types: true
+    annotate_overrides: true #Pedantic
+    avoid_annotating_with_dynamic: true
+    avoid_bool_literals_in_conditional_expressions: true
+    avoid_catches_without_on_clauses: true #Effective
+    avoid_catching_errors: true #Effective
+    avoid_classes_with_only_static_members: true #Effective
+    avoid_double_and_int_checks: true
+    avoid_field_initializers_in_const_classes: true
+    avoid_function_literals_in_foreach_calls: true #Effective
+    avoid_implementing_value_types: true
+    avoid_init_to_null: true #Effective #Flutter
+    avoid_js_rounded_ints: true
+    avoid_null_checks_in_equality_operators: true #Effective #Pedantic
+    avoid_positional_boolean_parameters: true #Effective
+    avoid_private_typedef_functions: true #Effective
+    avoid_redundant_argument_values: true
+    avoid_renaming_method_parameters: true
+    avoid_return_types_on_setters: true #Effective #Flutter #Pedantic
+    avoid_returning_null: true #Effective
+    avoid_returning_null_for_void: true
+    avoid_returning_this: true #Effective
+    avoid_setters_without_getters: true #Effective
+    avoid_shadowing_type_parameters: true #Pedantic
+    avoid_single_cascade_in_expression_statements: true
+    avoid_types_on_closure_parameters: false #Effective
+    avoid_unnecessary_containers: true
+    avoid_unused_constructor_parameters: true
+    avoid_void_async: true
+    await_only_futures: true #Flutter
+    camel_case_extensions: true #Effective #Pedantic
+    camel_case_types: true #Effective #Flutter
+    cascade_invocations: true
+    constant_identifier_names: true #Effective
+    curly_braces_in_flow_control_structures: true #Effective #Pedantic
+    do_not_use_environment: true
+    empty_catches: true #Pedantic
+    empty_constructor_bodies: true #Effective #Flutter #Pedantic
+    exhaustive_cases: true
+    join_return_with_assignment: true
+    leading_newlines_in_multiline_strings: true
+    missing_whitespace_between_adjacent_strings: true
+    no_default_cases: true #Experimental
+    no_runtimeType_toString: true
+    non_constant_identifier_names: true #Effective #Flutter
+    null_closures: true #Pedantic
+    one_member_abstracts: true #Effective
+    only_throw_errors: true
+    overridden_fields: true
+    parameter_assignments: true
+    prefer_adjacent_string_concatenation: true #Effective #Pedantic
+    prefer_asserts_in_initializer_lists: true
+    prefer_asserts_with_message: true
+    prefer_collection_literals: true #Effective #Pedantic
+    prefer_conditional_assignment: true #Pedantic
+    prefer_const_constructors: true
+    prefer_const_constructors_in_immutables: true
+    prefer_const_declarations: true
+    prefer_const_literals_to_create_immutables: true
+    prefer_constructors_over_static_methods: true
+    prefer_contains: true #Pedantic
+    prefer_expression_function_bodies: true #Effective
+    prefer_final_fields: true #Effective #Pedantic
+    prefer_final_in_for_each: true
+    prefer_final_locals: true
+    prefer_for_elements_to_map_fromIterable: true #Pedantic
+    prefer_foreach: true
+    prefer_function_declarations_over_variables: true #Effective
+    prefer_generic_function_type_aliases: true #Effective #Pedantic
+    prefer_if_elements_to_conditional_expressions: true
+    prefer_if_null_operators: true #Pedantic
+    prefer_initializing_formals: true #Effective
+    prefer_inlined_adds: true
+    prefer_int_literals: true
+    prefer_interpolation_to_compose_strings: true #Effective
+    prefer_is_empty: true #Pedantic
+    prefer_is_not_empty: true #Flutter #Pedantic
+    prefer_is_not_operator: true
+    prefer_iterable_whereType: true #Effective #Pedantic
+    prefer_mixin: true #Effective
+    prefer_null_aware_operators: true
+    prefer_spread_collections: true #Pedantic
+    prefer_typing_uninitialized_variables: true #Effective
+    recursive_getters: true #Pedantic
+    sized_box_for_whitespace: true
+    slash_for_doc_comments: true #Effective #Flutter #Pedantic
+    sort_unnamed_constructors_first: true
+    type_init_formals: true #Effective #Flutter #Pedantic
+    unawaited_futures: true #Pedantic
+    unnecessary_await_in_return: true
+    unnecessary_brace_in_string_interps: true #Effective #Flutter
+    unnecessary_const: true #Effective #Pedantic
+    unnecessary_getters_setters: true #Effective #Flutter
+    unnecessary_lambdas: true #Effective
+    unnecessary_new: true #Effective #Pedantic
+    unnecessary_null_aware_assignments: true
+    unnecessary_null_in_if_null_operators: true #Pedantic
+    unnecessary_overrides: true
+    unnecessary_parenthesis: true
+    unnecessary_raw_strings: true
+    unnecessary_string_escapes: true
+    unnecessary_string_interpolations: true
+    unnecessary_this: true #Effective #Pedantic
+    use_function_type_syntax_for_parameters: true #Effective #Pedantic
+    use_is_even_rather_than_modulo: true
+    use_raw_strings: true
+    use_rethrow_when_possible: true #Effective #Pedantic
+    use_setters_to_change_properties: true #Effective
+    use_string_buffers: true
+    use_to_and_as_if_applicable: true #Effective
+    void_checks: true
+
+
+    ####FLUTTER STYLE RULES
+    avoid_web_libraries_in_flutter: true #Flutter #Experimental
+    cancel_subscriptions: true #Flutter
+    sort_child_properties_last: true
+    use_key_in_widget_constructors: true
+    use_full_hex_values_for_flutter_colors: true
+
+
+    ####PACKAGE STYLE RULES
+    directives_ordering: true #Effective
+    file_names: true #Effective
+    implementation_imports: true #Effective #Flutter
+    library_names: true #Effective #Flutter #Pedantic
+    library_prefixes: true #Effective #Pedantic
+    package_api_docs: true #Effective #Flutter
+    package_prefixed_library_names: true #Flutter
+    provide_deprecation_message: true
+#    public_member_api_docs: true
+    type_annotate_public_apis: true #Effective
+
+
+    ####PUB RULES
+    package_names: true #Flutter
+    sort_pub_dependencies: true

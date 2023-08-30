@@ -1,18 +1,14 @@
 part of voronoi;
 
 class LineSegment {
+  Point<num> p0;
+  Point<num> p1;
 
-  Point p0;
-  Point p1;
+  LineSegment(this.p0, this.p1);
 
-  LineSegment(Point p0, Point p1) {
-    this.p0 = p0;
-    this.p1 = p1;
-  }
-  
-  get length => (p0.distanceTo(p1)).abs();
-  
-  num compareLength(LineSegment other) {
-    return length - other.length;
-  }
+  num get length => p0.distanceTo(p1).abs();
+
+  num get squaredLength => p0.squaredDistanceTo(p1);
+
+  num compareLength(LineSegment other) => squaredLength - other.squaredLength;
 }

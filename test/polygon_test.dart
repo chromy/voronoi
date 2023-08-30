@@ -1,16 +1,17 @@
-import 'dart:math';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:voronoi/voronoi.dart';
 
-main() {
-  var smallSquare = new Polygon([new Point(0,0), new Point(1,0), new Point(1,1), new Point(0,1)]);
-  var bigSquare = new Polygon([new Point(0,0), new Point(0,5), new Point(5,5), new Point(5,0)]);
+void main() {
+  final Polygon<int> smallSquare = Polygon<int>(
+      <Point<int>>[const Point<int>(0, 0), const Point<int>(1, 0), const Point<int>(1, 1), const Point<int>(0, 1)]);
+  final Polygon<int> bigSquare = Polygon<int>(
+      <Point<int>>[const Point<int>(0, 0), const Point<int>(0, 5), const Point<int>(5, 5), const Point<int>(5, 0)]);
   test('polygons have area', () {
     expect(smallSquare.area, equals(1));
     expect(bigSquare.area, equals(25));
   });
   test('polygons have winding', () {
-    expect(smallSquare.winding, equals(Winding.COUNTERCLOCKWISE));
-    expect(bigSquare.winding, equals(Winding.CLOCKWISE));
+    expect(smallSquare.winding, equals(Winding.counterclockwise));
+    expect(bigSquare.winding, equals(Winding.clockwise));
   });
 }

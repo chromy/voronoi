@@ -1,59 +1,56 @@
 part of voronoi;
 
-class Halfedge {
-  Halfedge edgeListLeftNeighbor;
-  Halfedge edgeListRightNeighbor;
-  Halfedge nextInPriorityQueue;
-  
-  Edge edge;
-  LR leftRight;
-  Vertex vertex;
-  
-  // the vertex's y-coordinate in the transformed Voronoi space V*
-  num ystar;
-  
-  Halfedge(Edge edge, LR leftRight) {
-    this.edge = edge;
-    this.leftRight = leftRight;
-    nextInPriorityQueue = null;
-    vertex = null;
-    ystar = 0;
-  }
-  
-  factory Halfedge.createDummy() {
-    return new Halfedge(null, null);
-  }
-  
-  String toString() {
-    return "Halfedge(leftRight: $leftRight, vertex: $vertex)";
-  }
-  
-  bool isLeftOf(Point<num> p) {
-    Site topSite;
-    bool rightOfSite, above, fast;
-    num dxp, dyp, dxs, t1, t2, t3, yl;
+class HalfEdge {
+  HalfEdge? edgeListLeftNeighbor;
+  HalfEdge? edgeListRightNeighbor;
 
-    topSite = edge.rightSite;
-    rightOfSite = p.x > topSite.x;
-    
-    if (rightOfSite && this.leftRight == LR.LEFT) {
+  Edge? edge;
+  Direction direction;
+  Vertex<num>? vertex;
+
+  // the vertex's y-coordinate in the transformed Voronoi space V*
+  num yStar = 0;
+
+  /// The value used in sorting HalfEdges in the main SplayTreeMap used in Fortune's algorithm.
+  int get sortHash => Point.hashCoordinates<num>(vertex?.x ?? 0, yStar);
+
+  HalfEdge(this.edge, this.direction);
+
+  factory HalfEdge.createDummy() => HalfEdge(null, Direction.none);
+
+  @override
+  String toString() => "Halfedge(direction: $direction, vertex: $vertex)";
+
+  bool isLeftOf(Point<num> point) {
+    if (edge == null) {
+      throw ArgumentError.notNull("Halfedge.edge");
+    }
+
+    Site<num> topSite;
+    bool rightOfSite, above, fast;
+    num dxP, dyP, dxS, t1, t2, t3, yl;
+
+    topSite = edge!.rightSite;
+    rightOfSite = point.x > topSite.x;
+
+    if (rightOfSite && direction == Direction.left) {
       return true;
     }
-    
-    if (!rightOfSite && this.leftRight == LR.RIGHT) {
+
+    if (!rightOfSite && direction == Direction.right) {
       return false;
     }
-    
-    if (edge.a == 1.0) {
-      dyp = p.y - topSite.y;
-      dxp = p.x - topSite.x;
+
+    if (edge!.a == 1.0) {
+      dyP = point.y - topSite.y;
+      dxP = point.x - topSite.x;
       fast = false;
-      if ((!rightOfSite && edge.b < 0.0) || (rightOfSite && edge.b >= 0.0)) {
-        above = dyp >= edge.b * dxp;  
+      if ((!rightOfSite && edge!.b < 0.0) || (rightOfSite && edge!.b >= 0.0)) {
+        above = dyP >= edge!.b * dxP;
         fast = above;
       } else {
-        above = p.x + p.y * edge.b > edge.c;
-        if (edge.b < 0.0) {
+        above = point.x + point.y * edge!.b > edge!.c;
+        if (edge!.b < 0.0) {
           above = !above;
         }
         if (!above) {
@@ -61,20 +58,20 @@ class Halfedge {
         }
       }
       if (!fast) {
-        dxs = topSite.x - edge.leftSite.x;
-        above = edge.b * (dxp * dxp - dyp * dyp) <
-            dxs * dyp * (1.0 + 2.0 * dxp/dxs + edge.b * edge.b);
-        if (edge.b < 0.0) {
+        dxS = topSite.x - edge!.leftSite.x;
+        above = edge!.b * (dxP * dxP - dyP * dyP) <
+            dxS * dyP * (1.0 + 2.0 * dxP / dxS + edge!.b * edge!.b);
+        if (edge!.b < 0.0) {
           above = !above;
         }
       }
-    } else  /* edge.b == 1.0 */ {
-      yl = edge.c - edge.a * p.x;
-      t1 = p.y - yl;
-      t2 = p.x - topSite.x;
+    } else /* edge.b == 1.0 */ {
+      yl = edge!.c - edge!.a * point.x;
+      t1 = point.y - yl;
+      t2 = point.x - topSite.x;
       t3 = yl - topSite.y;
       above = t1 * t1 > t2 * t2 + t3 * t3;
     }
-    return this.leftRight == LR.LEFT ? above : !above;
+    return direction == Direction.left ? above : !above;
   }
 }
