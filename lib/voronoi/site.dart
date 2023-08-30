@@ -68,7 +68,7 @@ class Site<T extends num> extends Point<T> {
   }
 
   void reorderEdges() {
-    final EdgeReorderer reorderer = EdgeReorderer(_edges, "vertex");
+    final EdgeReorderer<Vertex<num>> reorderer = EdgeReorderer<Vertex<num>>(_edges);
     _edges = reorderer.edges;
     _edgeOrientations = reorderer.edgeOrientations;
   }

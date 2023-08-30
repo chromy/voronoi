@@ -1,40 +1,52 @@
 part of voronoi;
 
-class EdgeReorderer {
+class EdgeReorderer<T extends Point<num>> {
   List<Edge> _edges = <Edge>[];
   final List<Direction> _edgeOrientations = <Direction>[];
+
   List<Edge> get edges => _edges;
+
   List<Direction> get edgeOrientations => _edgeOrientations;
 
-  EdgeReorderer(List<Edge> origEdges, String criterion) {
-    if (criterion != "vertex" && criterion != "site") {
-      throw ArgumentError("Edges: criterion must be vertex or site");
-    }
+  EdgeReorderer(List<Edge> origEdges) {
     if (origEdges.isNotEmpty) {
-      _edges = reorderEdges(origEdges, criterion);
+      switch (T) {
+        case const (Site<num>):
+          _edges = reorderEdges(origEdges);
+          break;
+        case const (Vertex<num>):
+          _edges = reorderEdges(origEdges);
+          break;
+      }
     }
   }
 
-  List<Edge> reorderEdges(List<Edge> origEdges, String criterion) {
-    int i;
+  List<Edge> reorderEdges(List<Edge> origEdges) {
+    int i = 0;
+    int nDone = 0;
     final int n = origEdges.length;
-    Edge edge;
     // we're going to reorder the edges in order of traversal
     final List<bool> done = List<bool>.filled(n, false);
-    int nDone = 0;
     final List<Edge> newEdges = <Edge>[];
 
-    i = 0;
-    edge = origEdges[i];
+    Edge edge = origEdges[i];
     newEdges.add(edge);
     _edgeOrientations.add(Direction.left);
 
-    Object? firstPoint = (criterion == "vertex") ? edge.vertices[Direction.left] : edge.leftSite;
-    Object? lastPoint = (criterion == "vertex") ? edge.vertices[Direction.right] : edge.rightSite;
+    Object? firstPoint, lastPoint, rightPoint, leftPoint;
 
-    if (firstPoint == Vertex.vertexAtInfinity ||
-        lastPoint == Vertex.vertexAtInfinity) {
-      return <Edge>[];
+    switch (T) {
+      case const (Site<num>):
+        firstPoint = edge.leftSite;
+        lastPoint = edge.rightSite;
+        break;
+      case const (Vertex<num>):
+        firstPoint = edge.vertices[Direction.left];
+        lastPoint = edge.vertices[Direction.right];
+        if (firstPoint == Vertex.vertexAtInfinity || lastPoint == Vertex.vertexAtInfinity) {
+          return <Edge>[];
+        }
+        break;
     }
 
     done[i] = true;
@@ -46,38 +58,39 @@ class EdgeReorderer {
           continue;
         }
         edge = origEdges[i];
-        final Object? leftPoint =
-            (criterion == "vertex") ? edge.vertices[Direction.left] : edge.leftSite;
-        final Object? rightPoint =
-            (criterion == "vertex") ? edge.vertices[Direction.right] : edge.rightSite;
-        if (leftPoint == Vertex.vertexAtInfinity ||
-            rightPoint == Vertex.vertexAtInfinity) {
-          return <Edge>[];
+        switch (T) {
+          case const (Site<num>):
+            leftPoint = edge.leftSite;
+            rightPoint = edge.rightSite;
+            break;
+          case const (Vertex<num>):
+            leftPoint = edge.vertices[Direction.left];
+            rightPoint = edge.vertices[Direction.right];
+            if (leftPoint == Vertex.vertexAtInfinity || rightPoint == Vertex.vertexAtInfinity) {
+              return <Edge>[];
+            }
+            break;
         }
         if (leftPoint == lastPoint) {
           lastPoint = rightPoint;
           _edgeOrientations.add(Direction.left);
           newEdges.add(edge);
-          done[i] = true;
         } else if (rightPoint == firstPoint) {
           firstPoint = leftPoint;
           _edgeOrientations.insert(0, Direction.left);
           newEdges.insert(0, edge);
-          done[i] = true;
         } else if (leftPoint == firstPoint) {
           firstPoint = rightPoint;
           _edgeOrientations.insert(0, Direction.right);
           newEdges.insert(0, edge);
-          done[i] = true;
         } else if (rightPoint == lastPoint) {
           lastPoint = leftPoint;
           _edgeOrientations.add(Direction.right);
           newEdges.add(edge);
-          done[i] = true;
+        } else {
+          continue;
         }
-        if (done[i]) {
-          ++nDone;
-        }
+        ++nDone;
       }
     }
 

@@ -131,7 +131,7 @@ class Voronoi {
       return points;
     }
 
-    final EdgeReorderer reorderer = EdgeReorderer(theHullEdges, "site");
+    final EdgeReorderer<Site<num>> reorderer = EdgeReorderer<Site<num>>(theHullEdges);
     theHullEdges = reorderer.edges;
     final List<Direction> orientations = reorderer.edgeOrientations;
 
