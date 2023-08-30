@@ -1,7 +1,7 @@
 library demo;
 
 import 'dart:html';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:voronoi/voronoi.dart';
 
@@ -9,7 +9,7 @@ final InputElement slider = querySelector("#slider")! as InputElement;
 final InputElement button = querySelector("#button")! as InputElement;
 final CanvasElement canvas = querySelector("#area")! as CanvasElement;
 final Element notes = querySelector("#notes")!;
-final VoronoiDemo demo = VoronoiDemo(canvas, 10, Random().nextInt(100000));
+final VoronoiDemo demo = VoronoiDemo(canvas, 10, math.Random().nextInt(100000));
 num fpsAverage = 0;
 
 void main() {
@@ -22,11 +22,10 @@ void main() {
 void update() {
   demo.sites = int.parse(slider.value ?? "");
   demo.recompute();
-  notes.text = "${demo.sites} sites";
 }
 
 void randomiseSeed() {
-  demo.seed = Random().nextInt(100000);
+  demo.seed = math.Random().nextInt(100000);
   update();
 }
 
@@ -47,7 +46,7 @@ class VoronoiDemo {
   // Initialize the diagram.
   void start() {
     // Measure the canvas element.
-    final Rectangle<num> rect = canvas.parent!.client;
+    final math.Rectangle<num> rect = canvas.parent!.client;
     width = rect.width;
     height = rect.height;
     canvas.width = width as int?;
@@ -61,14 +60,16 @@ class VoronoiDemo {
 
   void recompute() {
     // Create random points.
-    final Random rng = Random(seed);
+    final math.Random rng = math.Random(seed);
     Point<int> randomPoint() => Point<int>(rng.nextInt(width.floor()), rng.nextInt(height.floor()));
     final List<Point<num>> randomPoints = List<Point<num>>.generate(sites, (int i) => randomPoint());
     final Set<Point<num>> randomUniquePoints = Set<Point<num>>.from(randomPoints);
 
     // Compute the diagram.
-    voronoi = Voronoi(
-        List<Point<num>>.from(randomUniquePoints), List<int>.filled(randomUniquePoints.length, 0), Rectangle<num>(0, 0, width, height));
+    final DateTime startTime = DateTime.timestamp();
+    voronoi = Voronoi(List<Point<num>>.from(randomUniquePoints), math.Rectangle<num>(0, 0, width, height));
+    final DateTime endTime = DateTime.timestamp();
+    notes.text = "Voronoi with ${demo.sites} sites calculated in ${endTime.difference(startTime).inMilliseconds} ms.";
   }
 
   void draw(num _) {
@@ -89,9 +90,9 @@ class VoronoiDemo {
   void drawSites(CanvasRenderingContext2D context) {
     for (final Point<num> site in voronoi.sites) {
       context
-        ..fillStyle = '#000'
+        ..fillStyle = '#ccc'
         ..beginPath()
-        ..arc(site.x, site.y, 1, 0, pi * 2, true)
+        ..arc(site.x, site.y, 1, 0, math.pi * 2, true)
         ..closePath()
         ..fill();
     }

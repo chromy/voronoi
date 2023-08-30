@@ -38,15 +38,15 @@ class SiteList<T extends num> extends ListBase<Site<T>> {
     }
   }
 
-  Rectangle<num> getSitesBounds() {
+  math.Rectangle<num> getSitesBounds() {
     if (!_sorted) {
-      Site.sortSites(this);
+      sort();
       _currentIndex = 0;
       _sorted = true;
     }
     num xMin, xMax, yMin, yMax;
     if (isEmpty) {
-      return const Rectangle<int>(0, 0, 0, 0);
+      return const math.Rectangle<int>(0, 0, 0, 0);
     }
     xMin = double.maxFinite;
     xMax = double.negativeInfinity;
@@ -62,7 +62,7 @@ class SiteList<T extends num> extends ListBase<Site<T>> {
     yMin = this[0].y;
     yMax = this[length - 1].y;
 
-    return Rectangle<num>(xMin, yMin, xMax - xMin, yMax - yMin);
+    return math.Rectangle<num>(xMin, yMin, xMax - xMin, yMax - yMin);
   }
 
   /// @return the largest circle centered at each site that fits in its region;
@@ -75,5 +75,5 @@ class SiteList<T extends num> extends ListBase<Site<T>> {
       }
   }).whereType<Circle>();
 
-  Iterable<List<Point<num>>> regions(Rectangle<num> plotBounds) => map((Site<T> site) => site.region(plotBounds));
+  Iterable<List<Point<num>>> regions(math.Rectangle<num> plotBounds) => map((Site<T> site) => site.region(plotBounds));
 }

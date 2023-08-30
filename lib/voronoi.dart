@@ -15,36 +15,28 @@
 library voronoi;
 
 import 'dart:collection';
-import 'dart:math';
+import 'dart:math' as math;
 
 part 'geom/circle.dart';
 
 part 'geom/line_segment.dart';
 
-part 'geom/triangle.dart';
+part 'geom/point.dart';
 
 part 'geom/polygon.dart';
 
+part 'geom/triangle.dart';
+
 part 'geom/winding.dart';
-
 part 'voronoi/direction.dart';
-
 part 'voronoi/edge.dart';
-
 part 'voronoi/edge_list.dart';
-
 part 'voronoi/edge_reorderer.dart';
-
 part 'voronoi/half_edge.dart';
-
 part 'voronoi/halfedge_priority_queue.dart';
-
 part 'voronoi/site.dart';
-
 part 'voronoi/site_list.dart';
-
 part 'voronoi/vertex.dart';
-
 part 'voronoi/vertex_pair.dart';
 
 class BitmapData {}
@@ -61,26 +53,26 @@ class Voronoi {
 
   // TODO generalize this so it doesn't have to be a rectangle;
   // then we can make the fractal voronois-within-voronois
-  final Rectangle<num> _plotBounds;
+  final math.Rectangle<num> _plotBounds;
 
-  Rectangle<num> get plotBounds => _plotBounds;
+  math.Rectangle<num> get plotBounds => _plotBounds;
 
-  Voronoi(List<Point<num>> points, List<int> colors, this._plotBounds) {
-    addSites(points, colors);
+  Voronoi(Iterable<math.Point<num>> points, this._plotBounds) {
+    addSites(points.map((math.Point<num> p) => Point<num>(p.x, p.y)));
     fortunesAlgorithm();
   }
 
-  void addSites(List<Point<num>> points, List<int> colors) {
-    final int length = points.length;
-    for (int i = 0; i < length; ++i) {
-      addSite(points[i], colors.isNotEmpty ? colors[i] : 0, i);
+  void addSites(Iterable<Point<num>> points) {
+    int i = 0;
+    for (final Point<num> point in points) {
+      addSite(point, i++);
     }
   }
 
-  void addSite(Point<num> p, int color, int index) {
-    final Random random = Random();
+  void addSite(Point<num> p, int index) {
+    final math.Random random = math.Random();
     final num weight = random.nextDouble() * 100;
-    final Site<num> site = Site<num>(p.x, p.y, index, weight, color);
+    final Site<num> site = Site<num>(p.x, p.y, weight);
     _sites.add(site);
     _sitesIndexedByLocation[p] = site;
   }
@@ -175,9 +167,9 @@ class Voronoi {
     HalfEdge lbnd, rbnd, llbnd, rrbnd, bisector;
     Edge edge;
 
-    final Rectangle<num> dataBounds = _sites.getSitesBounds();
+    final math.Rectangle<num> dataBounds = _sites.getSitesBounds();
 
-    final int sqrtNSites = sqrt(_sites.length + 4).round();
+    final int sqrtNSites = math.sqrt(_sites.length + 4).round();
     final HalfedgePriorityQueue heap = HalfedgePriorityQueue(dataBounds.left, dataBounds.height, sqrtNSites);
     final EdgeList edgeList = EdgeList(dataBounds.left, dataBounds.width, sqrtNSites);
     final List<HalfEdge> halfEdges = <HalfEdge>[];
@@ -207,7 +199,7 @@ class Voronoi {
         newintstar = heap.min();
       }
 
-      if (newSite != null && (heap.empty() || compareByYThenX(newSite, newintstar) < 0)) {
+      if (newSite != null && (heap.empty() || newSite.compareTo(newintstar!) < 0)) {
         /* new site is smallest */
 
         // Step 8:
@@ -325,22 +317,4 @@ class Voronoi {
     vertices.length = 0;
   }
 
-  static int compareByYThenX(Site<num> s1, Point<num>? s2) {
-    if (s2 == null) {
-      return 0;
-    }
-    if (s1.y < s2.y) {
-      return -1;
-    }
-    if (s1.y > s2.y) {
-      return 1;
-    }
-    if (s1.x < s2.x) {
-      return -1;
-    }
-    if (s1.x > s2.x) {
-      return 1;
-    }
-    return 0;
-  }
 }

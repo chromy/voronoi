@@ -3,13 +3,11 @@ part of voronoi;
 class Site<T extends num> extends Point<T> {
   static const num epsilon = 0.005;
 
-  int color;
   num weight;
-
-  int _siteIndex;
 
   // the edges that define this Site's Voronoi region:
   List<Edge> _edges = <Edge>[];
+
   List<Edge> get edges => _edges;
 
   // which end of each edge hooks up with the previous edge in _edges:
@@ -18,7 +16,7 @@ class Site<T extends num> extends Point<T> {
   // ordered list of points that define the region clipped to bounds:
   List<Point<num>>? _region;
 
-  Site(super.x, super.y, this._siteIndex, this.weight, this.color);
+  Site(super.x, super.y, this.weight);
 
   void addEdge(Edge edge) {
     _edges.add(edge);
@@ -56,7 +54,7 @@ class Site<T extends num> extends Point<T> {
     return null;
   }
 
-  List<Point<num>> region(Rectangle<num> clippingBounds) {
+  List<Point<num>> region(math.Rectangle<num> clippingBounds) {
     if (_edges.isEmpty) {
       return <Point<num>>[];
     }
@@ -76,7 +74,7 @@ class Site<T extends num> extends Point<T> {
     _edgeOrientations = reorderer.edgeOrientations;
   }
 
-  List<Point<num>> clipToBounds(Rectangle<num> bounds) {
+  List<Point<num>> clipToBounds(math.Rectangle<num> bounds) {
     final List<Point<num>> points = <Point<num>>[];
     final int n = _edges.length;
     int i = 0;
@@ -91,8 +89,9 @@ class Site<T extends num> extends Point<T> {
     }
     edge = _edges[i];
     final Direction direction = _edgeOrientations![i];
-    points..add(edge.clippedEnds[direction]!)
-    ..add(edge.clippedEnds[direction.other]!);
+    points
+      ..add(edge.clippedEnds[direction]!)
+      ..add(edge.clippedEnds[direction.other]!);
 
     for (int j = i + 1; j < n; ++j) {
       edge = _edges[j];
@@ -107,8 +106,7 @@ class Site<T extends num> extends Point<T> {
     return points;
   }
 
-  void connect(List<Point<num>> points, int j, Rectangle<num> bounds,
-      {bool closingUp = false}) {
+  void connect(List<Point<num>> points, int j, math.Rectangle<num> bounds, {bool closingUp = false}) {
     final Point<num> rightPoint = points[points.length - 1];
     final Edge newEdge = _edges[j];
     final Direction newOrientation = _edgeOrientations![j];
@@ -135,14 +133,14 @@ class Site<T extends num> extends Point<T> {
             py = bounds.top;
             points.add(Point<num>(px, py));
           } else if (newCheck & BoundsCheck.left != 0) {
-            if (rightPoint.y - bounds.top + newPoint.y - bounds.top <
-                bounds.height) {
+            if (rightPoint.y - bounds.top + newPoint.y - bounds.top < bounds.height) {
               py = bounds.top;
             } else {
               py = bounds.bottom;
             }
-            points..add(Point<num>(px, py))
-            ..add(Point<num>(bounds.left, py));
+            points
+              ..add(Point<num>(px, py))
+              ..add(Point<num>(bounds.left, py));
           }
         } else if (rightCheck & BoundsCheck.left != 0) {
           px = bounds.left;
@@ -153,14 +151,14 @@ class Site<T extends num> extends Point<T> {
             py = bounds.top;
             points.add(Point<num>(px, py));
           } else if (newCheck & BoundsCheck.right != 0) {
-            if (rightPoint.y - bounds.top + newPoint.y - bounds.top <
-                bounds.height) {
+            if (rightPoint.y - bounds.top + newPoint.y - bounds.top < bounds.height) {
               py = bounds.top;
             } else {
               py = bounds.bottom;
             }
-            points..add(Point<num>(px, py))
-            ..add(Point<num>(bounds.right, py));
+            points
+              ..add(Point<num>(px, py))
+              ..add(Point<num>(bounds.right, py));
           }
         } else if (rightCheck & BoundsCheck.top != 0) {
           py = bounds.top;
@@ -171,14 +169,14 @@ class Site<T extends num> extends Point<T> {
             px = bounds.left;
             points.add(Point<num>(px, py));
           } else if (newCheck & BoundsCheck.bottom != 0) {
-            if (rightPoint.x - bounds.top + newPoint.x - bounds.top <
-                bounds.width) {
+            if (rightPoint.x - bounds.top + newPoint.x - bounds.top < bounds.width) {
               px = bounds.left;
             } else {
               px = bounds.right;
             }
-            points..add(Point<num>(px, py))
-            ..add(Point<num>(px, bounds.bottom));
+            points
+              ..add(Point<num>(px, py))
+              ..add(Point<num>(px, bounds.bottom));
           }
         } else if (rightCheck & BoundsCheck.bottom != 0) {
           py = bounds.bottom;
@@ -189,14 +187,14 @@ class Site<T extends num> extends Point<T> {
             px = bounds.left;
             points.add(Point<num>(px, py));
           } else if (newCheck & BoundsCheck.top != 0) {
-            if (rightPoint.x - bounds.top + newPoint.x - bounds.top <
-                bounds.width) {
+            if (rightPoint.x - bounds.top + newPoint.x - bounds.top < bounds.width) {
               px = bounds.left;
             } else {
               px = bounds.right;
             }
-            points..add(Point<num>(px, py))
-            ..add(Point<num>(px, bounds.top));
+            points
+              ..add(Point<num>(px, py))
+              ..add(Point<num>(px, bounds.top));
           }
         }
       }
@@ -213,35 +211,6 @@ class Site<T extends num> extends Point<T> {
   }
 
   static bool closeEnough(Point<num> p0, Point<num> p1) => p0.distanceTo(p1) < epsilon;
-
-  static void sortSites(List<Site<num>> sites) => sites.sort(Site.compare);
-
-  /// sort sites on y, then x, coord
-  /// also change each site's _siteIndex to match its new position in the list
-  /// so the _siteIndex can be used to identify the site for nearest-neighbor queries
-  ///
-  /// haha "also" - means more than one responsibility...
-  ///
-  static int compare(Site<num> s1, Site<num> s2) {
-    final int returnValue = Voronoi.compareByYThenX(s1, s2);
-
-    // swap _siteIndex values if necessary to match new ordering:
-    int tempIndex;
-    if (returnValue < 0) {
-      if (s1._siteIndex > s2._siteIndex) {
-        tempIndex = s1._siteIndex;
-        s1._siteIndex = s2._siteIndex;
-        s2._siteIndex = tempIndex;
-      }
-    } else if (returnValue == 1) {
-      if (s2._siteIndex > s1._siteIndex) {
-        tempIndex = s2._siteIndex;
-        s2._siteIndex = s1._siteIndex;
-        s1._siteIndex = tempIndex;
-      }
-    }
-    return returnValue;
-  }
 }
 
 class BoundsCheck {
@@ -255,7 +224,7 @@ class BoundsCheck {
   /// @param bounds
   /// @return an int with the appropriate bits set if the Point lies on the corresponding bounds lines
   ///
-  static int check(Point<num> point, Rectangle<num> bounds) {
+  static int check(Point<num> point, math.Rectangle<num> bounds) {
     int value = 0;
     if (point.x == bounds.left) {
       value |= left;

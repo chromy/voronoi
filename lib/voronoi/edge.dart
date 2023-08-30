@@ -93,7 +93,7 @@ class Edge {
   /// within the bounds.  If no part of the Edge falls within the bounds, leave _clippedVertices null.
   /// @param bounds
   ///
-  void clipVertices(Rectangle<num> bounds) {
+  void clipVertices(math.Rectangle<num> bounds) {
     final num xMin = bounds.left;
     final num yMin = bounds.top;
     final num xMax = bounds.right;
