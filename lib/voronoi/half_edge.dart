@@ -5,7 +5,7 @@ class HalfEdge {
   HalfEdge? edgeListRightNeighbor;
 
   Edge? edge;
-  Direction direction;
+
   Vertex<num>? vertex;
 
   // the vertex's y-coordinate in the transformed Voronoi space V*
@@ -14,12 +14,12 @@ class HalfEdge {
   /// The value used in sorting HalfEdges in the main SplayTreeMap used in Fortune's algorithm.
   int get sortHash => Point.hashCoordinates<num>(vertex?.x ?? 0, yStar);
 
-  HalfEdge(this.edge, this.direction);
+  HalfEdge(this.edge);
 
-  factory HalfEdge.createDummy() => HalfEdge(null, Direction.none);
+  factory HalfEdge.createDummy() => HalfEdge(null);
 
   @override
-  String toString() => "Halfedge(direction: $direction, vertex: $vertex)";
+  String toString() => "Halfedge(edge: $edge, vertex: $vertex)";
 
   bool isLeftOf(Point<num> point) {
     if (edge == null) {
@@ -31,11 +31,11 @@ class HalfEdge {
     final Site<num> topSite = edge!.sites.right;
     final bool rightOfSite = point.x > topSite.x;
 
-    if (rightOfSite && direction == Direction.left) {
+    if (rightOfSite && edge!.direction == Direction.left) {
       return true;
     }
 
-    if (!rightOfSite && direction == Direction.right) {
+    if (!rightOfSite && edge!.direction == Direction.right) {
       return false;
     }
 
@@ -71,6 +71,6 @@ class HalfEdge {
       above = t1 * t1 > t2 * t2 + t3 * t3;
     }
 
-    return direction == Direction.left ? above : !above;
+    return edge!.direction == Direction.left ? above : !above;
   }
 }

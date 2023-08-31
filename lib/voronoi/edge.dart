@@ -20,6 +20,14 @@ class Edge {
 
   Edge();
 
+  Edge.fromOther(Edge edge) {
+    sites = edge.sites;
+    direction = edge.direction;
+    vertices = edge.vertices;
+    clippedVertices = edge.clippedVertices;
+    equation = edge.equation;
+  }
+
   /// This is the only way to create a new Edge
   factory Edge.createBisectingEdge(Site<num> site0, Site<num> site1) {
     ({num a, num b, num c}) equation;
