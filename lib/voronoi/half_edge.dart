@@ -41,10 +41,8 @@ class HalfEdge {
 
     if (edge!.equation.a == 1) {
       bool fast = false;
-      num dxP, dyP, dxS;
-
-      dyP = point.y - topSite.y;
-      dxP = point.x - topSite.x;
+      final num dyP = point.y - topSite.y;
+      final num dxP = point.x - topSite.x;
       if ((!rightOfSite && edge!.equation.b < 0) || (rightOfSite && edge!.equation.b >= 0)) {
         above = dyP >= edge!.equation.b * dxP;
         fast = above;
@@ -58,7 +56,7 @@ class HalfEdge {
         }
       }
       if (!fast) {
-        dxS = topSite.x - edge!.sites.left.x;
+        final num dxS = topSite.x - edge!.sites.left.x;
         above = edge!.equation.b * (dxP * dxP - dyP * dyP) <
             dxS * dyP * (1 + 2 * dxP / dxS + edge!.equation.b * edge!.equation.b);
         if (edge!.equation.b < 0) {

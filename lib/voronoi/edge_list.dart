@@ -3,36 +3,23 @@ part of voronoi;
 class EdgeList extends ListBase<HalfEdge?> {
   num _deltaX;
   final num _xMin;
-  late int _hashSize;
 
   late List<HalfEdge?> _hash;
 
-  late HalfEdge _leftEnd;
-
-  HalfEdge get leftEnd => _leftEnd;
-
-  late HalfEdge _rightEnd;
-
-  HalfEdge get rightEnd => _rightEnd;
-
-  EdgeList(this._xMin, this._deltaX, int sqrtNSites) {
-    // TODO: fix hack
+  EdgeList(this._xMin, this._deltaX, int siteCount) {
     _deltaX = _deltaX == 0 ? 1 : _deltaX;
 
-    _hashSize = 2 * sqrtNSites;
-    _hash = List<HalfEdge?>.filled(_hashSize, null);
+    _hash = List<HalfEdge?>.filled(2 * math.sqrt(siteCount + 4).round(), null);
 
     // two dummy HalfEdges:
-    _leftEnd = HalfEdge.createDummy();
-    _rightEnd = HalfEdge.createDummy();
-    _leftEnd
+    first = HalfEdge.createDummy();
+    last = HalfEdge.createDummy();
+    first!
       ..edgeListLeftNeighbor = null
-      ..edgeListRightNeighbor = _rightEnd;
-    _rightEnd
-      ..edgeListLeftNeighbor = _leftEnd
+      ..edgeListRightNeighbor = last;
+    last!
+      ..edgeListLeftNeighbor = first
       ..edgeListRightNeighbor = null;
-    this[0] = _leftEnd;
-    this[_hashSize - 1] = _rightEnd;
   }
 
   @override
@@ -76,16 +63,10 @@ class EdgeList extends ListBase<HalfEdge?> {
   /// Find the rightmost HalfEdge that is still left of the given point.
   HalfEdge edgeListLeftNeighbor(Point<num> point) {
     /* Use hash table to get close to desired halfEdge */
-    int bucket = ((point.x - _xMin) / _deltaX * _hashSize).round();
-    if (bucket < 0) {
-      bucket = 0;
-    }
-    if (bucket >= _hashSize) {
-      bucket = _hashSize - 1;
-    }
+    final int bucket = ((point.x - _xMin) / _deltaX * length).round().clamp(0, length - 1);
     HalfEdge? halfEdge = getHash(bucket);
     if (halfEdge == null) {
-      for (int i = 1; i < _hashSize; ++i) {
+      for (int i = 1; i < length; ++i) {
         if ((halfEdge = getHash(bucket - i)) != null) {
           break;
         }
@@ -96,19 +77,19 @@ class EdgeList extends ListBase<HalfEdge?> {
     }
 
     /* Now search linear list of halfEdges for the correct one */
-    if (halfEdge == leftEnd || (halfEdge != rightEnd && halfEdge!.isLeftOf(point))) {
+    if (halfEdge == first || (halfEdge != last && halfEdge!.isLeftOf(point))) {
       do {
         halfEdge = halfEdge!.edgeListRightNeighbor!;
-      } while (halfEdge != rightEnd && halfEdge.isLeftOf(point));
+      } while (halfEdge != last && halfEdge.isLeftOf(point));
       halfEdge = halfEdge.edgeListLeftNeighbor!;
     } else {
       do {
         halfEdge = halfEdge!.edgeListLeftNeighbor!;
-      } while (halfEdge != leftEnd && !halfEdge.isLeftOf(point));
+      } while (halfEdge != first && !halfEdge.isLeftOf(point));
     }
 
     /* Update hash table and reference counts */
-    if (bucket > 0 && bucket < _hashSize - 1) {
+    if (bucket > 0 && bucket < length - 1) {
       this[bucket] = halfEdge;
     }
     return halfEdge;
@@ -116,7 +97,7 @@ class EdgeList extends ListBase<HalfEdge?> {
 
   /* Get entry from hash table, pruning any deleted nodes */
   HalfEdge? getHash(int b) {
-    if (b < 0 || b >= _hashSize) {
+    if (b < 0 || b >= length) {
       return null;
     }
 

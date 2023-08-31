@@ -1,12 +1,10 @@
 part of voronoi;
 
 class EdgeReorderer<T extends Point<num>> {
-  late final Iterable<Edge> _edges;
-
-  Iterable<Edge> get edges => _edges;
+  late final Iterable<Edge> edges;
 
   EdgeReorderer(Iterable<Edge> edges) {
-    _edges = reorderEdges(edges);
+    edges = reorderEdges(edges);
   }
 
   Iterable<Edge> reorderEdges(Iterable<Edge> edges) {

@@ -2,9 +2,7 @@ part of voronoi;
 
 class Site<T extends num> extends Point<T> {
   // the edges that define this Site's Voronoi region:
-  List<Edge> _edges = <Edge>[];
-
-  List<Edge> get edges => _edges;
+  List<Edge> edges = <Edge>[];
 
   bool isOrdered = false;
 
@@ -14,45 +12,41 @@ class Site<T extends num> extends Point<T> {
   Site(super.x, super.y);
 
   void addEdge(Edge edge) {
-    _edges.add(edge);
+    edges.add(edge);
   }
 
-  Edge nearestEdge() {
-    _edges.sort(Edge.compareSitesDistances);
-    return _edges[0];
-  }
+  Edge nearestEdge() => edges
+      .reduce((Edge nearestEdge, Edge edge) => edge.sitesDistance() < nearestEdge.sitesDistance() ? edge : nearestEdge);
 
-  List<Site<num>> neighborSites() {
-    if (_edges.isEmpty) {
-      return <Site<num>>[];
+  Iterable<Site<num>> neighborSites() {
+    if (edges.isEmpty) {
+      return const Iterable<Site<num>>.empty();
     }
+
     if (!isOrdered) {
       reorderEdges();
     }
-    final List<Site<num>> list = <Site<num>>[];
-    Edge edge;
-    for (edge in _edges) {
-      if (neighborSite(edge) != null) {
-        list.add(neighborSite(edge)!);
-      }
-    }
-    return list;
+
+    return edges.map(neighborSite).whereType<Site<num>>();
   }
 
   Site<num>? neighborSite(Edge edge) {
     if (this == edge.sites.left) {
       return edge.sites.right;
     }
+
     if (this == edge.sites.right) {
       return edge.sites.left;
     }
+
     return null;
   }
 
   List<Point<num>> region(math.Rectangle<num> clippingBounds) {
-    if (_edges.isEmpty) {
+    if (edges.isEmpty) {
       return <Point<num>>[];
     }
+
     if (!isOrdered) {
       reorderEdges();
       _region = clipToBounds(clippingBounds);
@@ -60,48 +54,36 @@ class Site<T extends num> extends Point<T> {
         _region = List<Point<num>>.from(_region!.reversed);
       }
     }
+
     return _region!;
   }
 
   void reorderEdges() {
-    final EdgeReorderer<Vertex<num>> reorderer = EdgeReorderer<Vertex<num>>(_edges);
-    _edges = reorderer.edges.toList();
+    final EdgeReorderer<Vertex<num>> reorderer = EdgeReorderer<Vertex<num>>(edges);
+    edges = reorderer.edges.toList();
     isOrdered = true;
   }
 
   List<Point<num>> clipToBounds(math.Rectangle<num> bounds) {
-    final List<Point<num>> points = <Point<num>>[];
-    int i = 0;
+    final Edge firstVisibleEdge = edges.firstWhere((Edge edge) => edge.visible);
+    final List<Point<num>> points = <Point<num>>[
+      firstVisibleEdge.clippedVertices[firstVisibleEdge.direction]!,
+      firstVisibleEdge.clippedVertices[firstVisibleEdge.direction.other]!
+    ];
 
-    while (i < _edges.length && !_edges[i].visible) {
-      i++;
-    }
+    edges
+        .where((Edge edge) => edge != firstVisibleEdge)
+        .where((Edge edge) => edge.visible)
+        .forEach((Edge edge) => connect(points, edge, bounds));
 
-    if (i == _edges.length) {
-      // no edges visible
-      return <Point<num>>[];
-    }
-    final Edge firstVisibleEdge = _edges[i];
-    points
-      ..add(firstVisibleEdge.clippedVertices[firstVisibleEdge.direction]!)
-      ..add(firstVisibleEdge.clippedVertices[firstVisibleEdge.direction.other]!);
-
-    for (int j = i + 1; j < _edges.length; ++j) {
-      final Edge edge = _edges[j];
-      if (!edge.visible) {
-        continue;
-      }
-      connect(points, j, bounds);
-    }
     // close up the polygon by adding another corner point of the bounds if needed:
-    connect(points, i, bounds, closingUp: true);
+    connect(points, firstVisibleEdge, bounds, closingUp: true);
 
     return points;
   }
 
-  void connect(List<Point<num>> points, int j, math.Rectangle<num> bounds, {bool closingUp = false}) {
+  void connect(List<Point<num>> points, Edge newEdge, math.Rectangle<num> bounds, {bool closingUp = false}) {
     final Point<num> rightPoint = points.last;
-    final Edge newEdge = _edges[j];
     // the point that must be connected to rightPoint:
     final Point<num> newPoint = newEdge.clippedVertices[newEdge.direction]!;
     if (rightPoint != newPoint) {

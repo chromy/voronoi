@@ -37,6 +37,7 @@ class Voronoi {
   final SiteList<num> _sites = SiteList<num>();
 
   List<Site<num>> get sites => _sites.toList();
+
   final Map<Point<num>, Site<num>> _sitesIndexedByLocation = <Point<num>, Site<num>>{};
 
   final List<Edge> _edges = <Edge>[];
@@ -63,9 +64,8 @@ class Voronoi {
   List<Point<num>> region(math.Point<num> point) =>
       _sitesIndexedByLocation[point]?.region(_plotBounds) ?? <Point<num>>[];
 
-  // TODO: bug: if you call this before you call region(), something goes wrong :(
-  List<Point<num>> neighborSitesForSite(math.Point<num> point) =>
-      _sitesIndexedByLocation[point]?.neighborSites() ?? <Site<num>>[];
+  Iterable<Point<num>> neighborSitesForSite(math.Point<num> point) =>
+      _sitesIndexedByLocation[point]?.neighborSites() ?? const Iterable<Site<num>>.empty();
 
   Iterable<Circle> circles() => _sites.circles();
 
@@ -108,7 +108,7 @@ class Voronoi {
 
     final SplayTreeMap<int, HalfEdge> heap = SplayTreeMap<int, HalfEdge>();
     final math.Rectangle<num> dataBounds = _sites.getSitesBounds();
-    final EdgeList edgeList = EdgeList(dataBounds.left, dataBounds.width, math.sqrt(_sites.length + 4).round());
+    final EdgeList edgeList = EdgeList(dataBounds.left, dataBounds.width, _sites.length);
 
     final Site<num> bottommostSite = _sites.next()!;
     Site<num>? newSite = _sites.next();

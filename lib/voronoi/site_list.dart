@@ -63,8 +63,7 @@ class SiteList<T extends num> extends ListBase<Site<T>> {
   Iterable<Circle> circles() => map((Site<T> site) {
         final Edge nearestEdge = site.nearestEdge();
         if (!nearestEdge.isPartOfConvexHull()) {
-          final num radius = nearestEdge.sitesDistance() * 0.5;
-          return Circle(site, radius);
+          return Circle(site, nearestEdge.sitesDistance() / 2);
         }
       }).whereType<Circle>();
 

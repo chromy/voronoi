@@ -13,9 +13,7 @@ class Edge {
   // the two Voronoi vertices that the edge connects (if one of them is null, the edge extends to infinity)
   OrientedPair<Vertex<num>?> vertices = OrientedPair<Vertex<num>?>(null, null);
 
-  OrientedPair<Point<num>?> _clippedVertices = OrientedPair<Point<num>?>(null, null);
-
-  OrientedPair<Point<num>?> get clippedVertices => _clippedVertices;
+  OrientedPair<Point<num>?> clippedVertices = OrientedPair<Point<num>?>(null, null);
 
   // the equation of the edge: ax + by = c
   late ({num a, num b, num c}) equation;
@@ -28,7 +26,7 @@ class Edge {
 
     final num dx = site1.x - site0.x;
     final num dy = site1.y - site0.y;
-    final num c = site0.x * dx + site0.y * dy + (dx * dx + dy * dy) * 0.5;
+    final num c = site0.x * dx + site0.y * dy + (dx * dx + dy * dy) / 2;
     if (dx.abs() > dy.abs()) {
       equation = (a: 1, b: dy / dx, c: c / dx);
     } else {
@@ -38,7 +36,7 @@ class Edge {
     final Edge edge = Edge()
       ..sites = OrientedPair<Site<num>>(site0, site1)
       ..vertices.both = null
-      .._clippedVertices.both = null
+      ..clippedVertices.both = null
       ..equation = equation;
 
     site0.addEdge(edge);
@@ -52,16 +50,14 @@ class Edge {
 
   // Return a LineSegment representing the edge, or null if the edge isn't visible
   LineSegment<Point<num>>? voronoiEdge() =>
-      visible ? LineSegment<Point<num>>.fromOrientedPair(_clippedVertices as OrientedPair<Vertex<num>>) : null;
+      visible ? LineSegment<Point<num>>.fromOrientedPair(clippedVertices as OrientedPair<Vertex<num>>) : null;
 
   bool isPartOfConvexHull() => !vertices.isDefined(Direction.both);
 
   num sitesDistance() => sites.left.distanceTo(sites.right);
 
-  static int compareSitesDistances(Edge e1, Edge e2) => e1.sitesDistance().compareTo(e2.sitesDistance());
-
   // The only edges that should be visible are those whose clipped vertices are both non-null.
-  bool get visible => !_clippedVertices.isDefined(Direction.none);
+  bool get visible => !clippedVertices.isDefined(Direction.none);
 
   /// Set _clippedVertices to contain the two ends of the portion of the Voronoi edge that is visible
   /// within the bounds.  If no part of the Edge falls within the bounds, leave _clippedVertices null.
@@ -160,14 +156,14 @@ class Edge {
       }
     }
 
-    _clippedVertices = OrientedPair<Point<num>?>(null, null);
+    clippedVertices = OrientedPair<Point<num>?>(null, null);
 
     if (vertex0 == vertices.left) {
-      _clippedVertices
+      clippedVertices
         ..left = Point<num>(x0, y0)
         ..right = Point<num>(x1, y1);
     } else {
-      _clippedVertices
+      clippedVertices
         ..right = Point<num>(x0, y0)
         ..left = Point<num>(x1, y1);
     }
