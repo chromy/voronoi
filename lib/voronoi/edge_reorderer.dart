@@ -2,11 +2,8 @@ part of voronoi;
 
 class EdgeReorderer<T extends Point<num>> {
   late final Iterable<Edge> _edges;
-  final ListQueue<Direction> _edgeOrientations = ListQueue<Direction>();
 
   Iterable<Edge> get edges => _edges;
-
-  ListQueue<Direction> get edgeOrientations => _edgeOrientations;
 
   EdgeReorderer(Iterable<Edge> edges) {
     _edges = reorderEdges(edges);
@@ -17,10 +14,8 @@ class EdgeReorderer<T extends Point<num>> {
       return const Iterable<Edge>.empty();
     }
 
-    final Edge firstEdge = edges.first;
+    final Edge firstEdge = edges.first..direction = Direction.left;
     final ListQueue<Edge> newEdges = ListQueue<Edge>.of(<Edge>[firstEdge]);
-
-    _edgeOrientations.add(Direction.left);
 
     T firstPoint, lastPoint;
 
@@ -56,19 +51,19 @@ class EdgeReorderer<T extends Point<num>> {
       }
       if (points.left == lastPoint) {
         lastPoint = points.right;
-        _edgeOrientations.addLast(Direction.left);
+        edge.direction = Direction.left;
         newEdges.addLast(edge);
       } else if (points.right == firstPoint) {
         firstPoint = points.left;
-        _edgeOrientations.addFirst(Direction.left);
+        edge.direction = Direction.left;
         newEdges.addFirst(edge);
       } else if (points.left == firstPoint) {
         firstPoint = points.right;
-        _edgeOrientations.addFirst(Direction.right);
+        edge.direction = Direction.right;
         newEdges.addFirst(edge);
       } else if (points.right == lastPoint) {
         lastPoint = points.left;
-        _edgeOrientations.addLast(Direction.right);
+        edge.direction = Direction.right;
         newEdges.addLast(edge);
       } else {
         continue;

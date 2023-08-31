@@ -95,10 +95,8 @@ class Voronoi {
   Iterable<Point<num>> hullPointsInOrder() {
     final EdgeReorderer<Site<num>> reorderer = EdgeReorderer<Site<num>>(hullEdges);
     final Iterable<Edge> reorderedEdges = reorderer.edges;
-    final Iterable<Direction> orientations = reorderer.edgeOrientations.toList();
 
-    int i = 0;
-    return reorderedEdges.map((Edge edge) => edge.sites[orientations.elementAt(i++)]).whereType<Site<num>>();
+    return reorderedEdges.map((Edge edge) => edge.sites[edge.direction]).whereType<Site<num>>();
   }
 
   Iterable<List<Point<num>>> regions() => _sites.regions(_plotBounds);

@@ -8,6 +8,8 @@ class Edge {
   // the two input Sites for which this Edge is a bisector:
   late OrientedPair<Site<num>> sites;
 
+  Direction direction = Direction.none;
+
   // the two Voronoi vertices that the edge connects (if one of them is null, the edge extends to infinity)
   OrientedPair<Vertex<num>?> vertices = OrientedPair<Vertex<num>?>(null, null);
 

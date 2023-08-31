@@ -6,8 +6,7 @@ class Site<T extends num> extends Point<T> {
 
   List<Edge> get edges => _edges;
 
-  // which end of each edge hooks up with the previous edge in _edges:
-  List<Direction>? _edgeOrientations;
+  bool isOrdered = false;
 
   // ordered list of points that define the region clipped to bounds:
   List<Point<num>>? _region;
@@ -27,7 +26,7 @@ class Site<T extends num> extends Point<T> {
     if (_edges.isEmpty) {
       return <Site<num>>[];
     }
-    if (_edgeOrientations == null) {
+    if (!isOrdered) {
       reorderEdges();
     }
     final List<Site<num>> list = <Site<num>>[];
@@ -54,7 +53,7 @@ class Site<T extends num> extends Point<T> {
     if (_edges.isEmpty) {
       return <Point<num>>[];
     }
-    if (_edgeOrientations == null) {
+    if (!isOrdered) {
       reorderEdges();
       _region = clipToBounds(clippingBounds);
       if (Polygon<num>(_region!).winding == Winding.clockwise) {
@@ -67,30 +66,28 @@ class Site<T extends num> extends Point<T> {
   void reorderEdges() {
     final EdgeReorderer<Vertex<num>> reorderer = EdgeReorderer<Vertex<num>>(_edges);
     _edges = reorderer.edges.toList();
-    _edgeOrientations = reorderer.edgeOrientations.toList();
+    isOrdered = true;
   }
 
   List<Point<num>> clipToBounds(math.Rectangle<num> bounds) {
     final List<Point<num>> points = <Point<num>>[];
-    final int n = _edges.length;
     int i = 0;
-    Edge edge;
-    while (i < n && !_edges[i].visible) {
-      ++i;
+
+    while (i < _edges.length && !_edges[i].visible) {
+      i++;
     }
 
-    if (i == n) {
+    if (i == _edges.length) {
       // no edges visible
       return <Point<num>>[];
     }
-    edge = _edges[i];
-    final Direction direction = _edgeOrientations![i];
+    final Edge firstVisibleEdge = _edges[i];
     points
-      ..add(edge.clippedVertices[direction]!)
-      ..add(edge.clippedVertices[direction.other]!);
+      ..add(firstVisibleEdge.clippedVertices[firstVisibleEdge.direction]!)
+      ..add(firstVisibleEdge.clippedVertices[firstVisibleEdge.direction.other]!);
 
-    for (int j = i + 1; j < n; ++j) {
-      edge = _edges[j];
+    for (int j = i + 1; j < _edges.length; ++j) {
+      final Edge edge = _edges[j];
       if (!edge.visible) {
         continue;
       }
@@ -105,9 +102,8 @@ class Site<T extends num> extends Point<T> {
   void connect(List<Point<num>> points, int j, math.Rectangle<num> bounds, {bool closingUp = false}) {
     final Point<num> rightPoint = points.last;
     final Edge newEdge = _edges[j];
-    final Direction newOrientation = _edgeOrientations![j];
     // the point that must be connected to rightPoint:
-    final Point<num> newPoint = newEdge.clippedVertices[newOrientation]!;
+    final Point<num> newPoint = newEdge.clippedVertices[newEdge.direction]!;
     if (rightPoint != newPoint) {
       // The points do not coincide, so they must have been clipped at the bounds;
       // see if they are on the same border of the bounds:
@@ -192,7 +188,7 @@ class Site<T extends num> extends Point<T> {
       }
       points.add(newPoint);
     }
-    final Point<num> newRightPoint = newEdge.clippedVertices[newOrientation.other]!;
+    final Point<num> newRightPoint = newEdge.clippedVertices[newEdge.direction.other]!;
     if (points[0] != newRightPoint) {
       points.add(newRightPoint);
     }
