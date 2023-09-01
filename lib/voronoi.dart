@@ -31,7 +31,6 @@ part 'voronoi/half_edge.dart';
 part 'voronoi/oriented_pair.dart';
 part 'voronoi/site.dart';
 part 'voronoi/site_list.dart';
-part 'voronoi/vertex.dart';
 
 class Voronoi {
   late final SiteList<num> siteList = SiteList<num>();
@@ -54,6 +53,7 @@ class Voronoi {
       siteList.add(site);
       siteMap[point] = site;
     }
+    siteList.sort();
 
     fortunesAlgorithm();
   }
@@ -89,8 +89,8 @@ class Voronoi {
   Iterable<Edge> get hullEdges => edges.where((Edge edge) => edge.isPartOfConvexHull());
 
   Iterable<Point<num>> hullPointsInOrder() {
-    final EdgeReorderer<Site<num>> reorderer = EdgeReorderer<Site<num>>(hullEdges);
-    final Iterable<Edge> reorderedEdges = reorderer.edges;
+    final EdgeReorderer reorderer = EdgeReorderer(hullEdges, (Edge edge) => edge.sites);
+    final Iterable<Edge> reorderedEdges = reorderer.orderedEdges;
 
     return reorderedEdges.map((Edge edge) => edge.sites[edge.direction]).whereType<Site<num>>();
   }
@@ -105,105 +105,88 @@ class Voronoi {
     final SplayTreeMap<int, HalfEdge> heap = SplayTreeMap<int, HalfEdge>();
     final math.Rectangle<num> dataBounds = siteList.getSitesBounds();
     final EdgeList edgeList = EdgeList(dataBounds.left, dataBounds.width, siteList.length);
-
     final Site<num> bottommostSite = siteList.next()!;
-    Site<num>? newSite = siteList.next();
 
+    void pushHalfEdge(HalfEdge halfEdge, Edge bisectorEdge, Site<num> site) {
+      final Point<num>? intersection = halfEdge.edge?.intersect(bisectorEdge);
+      if (intersection != null) {
+        heap.remove(halfEdge.sortHash);
+        halfEdge
+          ..vertex = intersection
+          ..yStar = intersection.y + site.distanceTo(intersection);
+        heap[halfEdge.sortHash] = halfEdge;
+      }
+    }
+
+    void handleSmallestSite(Site<num> newSite) {
+      final HalfEdge lbnd = edgeList.edgeListLeftNeighbor(newSite); // the HalfEdge just to the left of newSite
+      final Edge? rbndEdge = lbnd.edgeListRightNeighbor!.edge; // the Edge just to the right
+
+      final Site<num> bottomSite = rbndEdge?.sites[rbndEdge.direction] ?? bottommostSite;
+
+      final Edge edge = Edge.createBisectingEdge(bottomSite, newSite);
+      edges.add(edge);
+
+      final HalfEdge leftBisector = HalfEdge(Edge.fromOther(edge)..direction = Direction.left);
+      final HalfEdge rightBisector = HalfEdge(Edge.fromOther(edge)..direction = Direction.right);
+      edgeList
+        ..insertToRightOfHalfEdge(lbnd, leftBisector)
+        ..insertToRightOfHalfEdge(leftBisector, rightBisector);
+      pushHalfEdge(lbnd, leftBisector.edge!, newSite);
+      if (rbndEdge != null) {
+        pushHalfEdge(rightBisector, rbndEdge, newSite);
+      }
+    }
+
+    void handleSmallestIntersection() {
+      final HalfEdge lbnd = heap[heap.firstKey()]!;
+      final HalfEdge rbnd = lbnd.edgeListRightNeighbor!;
+      final HalfEdge llbnd = lbnd.edgeListLeftNeighbor!;
+      final Edge? rrbndEdge = rbnd.edgeListRightNeighbor!.edge;
+
+      Site<num> bottomSite = lbnd.edge?.sites[lbnd.edge!.direction] ?? bottommostSite;
+      Site<num> topSite = rbnd.edge?.sites[rbnd.edge!.direction.other] ?? bottommostSite;
+      Direction direction = Direction.left;
+      if (bottomSite.y > topSite.y) {
+        (bottomSite, topSite) = (topSite, bottomSite);
+        direction = Direction.right;
+      }
+
+      lbnd.edge!.vertices[lbnd.edge!.direction] = lbnd.vertex;
+      rbnd.edge!.vertices[rbnd.edge!.direction] = lbnd.vertex;
+      heap.remove(lbnd.sortHash);
+      edgeList.remove(lbnd);
+      heap.remove(rbnd.sortHash);
+      edgeList.remove(rbnd);
+
+      final Edge edge = Edge.createBisectingEdge(bottomSite, topSite);
+      edges.add(edge);
+      edge.vertices[direction.other] = lbnd.vertex;
+
+      final HalfEdge bisector = HalfEdge(Edge.fromOther(edge)..direction = direction);
+      edgeList.insertToRightOfHalfEdge(llbnd, bisector);
+      pushHalfEdge(llbnd, bisector.edge!, bottomSite);
+      if (rrbndEdge != null) {
+        pushHalfEdge(bisector, rrbndEdge, bottomSite);
+      }
+    }
+
+    Site<num>? newSite = siteList.next();
     for (;;) {
       if (newSite != null && (heap.isEmpty || newSite.hashCode.compareTo(heap.firstKey()!) < 0)) {
-        /* new site is smallest */
-
-        // Step 8:
-        HalfEdge lbnd = edgeList.edgeListLeftNeighbor(newSite); // the HalfEdge just to the left of newSite
-        final HalfEdge rbnd = lbnd.edgeListRightNeighbor!; // the HalfEdge just to the right
-        final Site<num> bottomSite = rbnd.edge?.sites[rbnd.edge!.direction] ?? bottommostSite;
-        // this Site determines the region containing the new site
-
-        // Step 9:
-        final Edge edge = Edge.createBisectingEdge(bottomSite, newSite);
-        edges.add(edge);
-
-        final HalfEdge leftBisector = HalfEdge(Edge.fromOther(edge)..direction = Direction.left);
-        // inserting two HalfEdges into edgeList constitutes Step 10:
-        // insert leftBisector to the right of lbnd:
-        edgeList.insertToRightOfHalfEdge(lbnd, leftBisector);
-
-        // first half of Step 11:
-        final Vertex<num>? rightVertex = Vertex.intersect(leftBisector.edge, lbnd.edge);
-        if (rightVertex != null) {
-          heap.remove(lbnd.sortHash);
-          lbnd
-            ..vertex = rightVertex
-            ..yStar = rightVertex.y + newSite.distanceTo(rightVertex);
-          heap[lbnd.sortHash] = lbnd;
-        }
-
-        lbnd = leftBisector;
-
-        final HalfEdge rightBisector = HalfEdge(Edge.fromOther(edge)..direction = Direction.right);
-        // second HalfEdge for Step 10:
-        // insert rightBisector to the right of lbnd:
-        edgeList.insertToRightOfHalfEdge(lbnd, rightBisector);
-
-        // second half of Step 11:
-        final Vertex<num>? leftVertex = Vertex.intersect(rightBisector.edge, rbnd.edge);
-        if (leftVertex != null) {
-          rightBisector
-            ..vertex = leftVertex
-            ..yStar = leftVertex.y + newSite.distanceTo(leftVertex);
-          heap[rightBisector.sortHash] = rightBisector;
-        }
-
+        handleSmallestSite(newSite);
         newSite = siteList.next();
       } else if (heap.isNotEmpty) {
-        /* intersection is smallest */
-        final HalfEdge lbnd = heap[heap.firstKey()]!;
-        heap.remove(lbnd.sortHash);
-        final HalfEdge llbnd = lbnd.edgeListLeftNeighbor!;
-        final HalfEdge rbnd = lbnd.edgeListRightNeighbor!;
-        final HalfEdge rrbnd = rbnd.edgeListRightNeighbor!;
-        Site<num> bottomSite = lbnd.edge?.sites[lbnd.edge!.direction] ?? bottommostSite;
-        Site<num> topSite = rbnd.edge?.sites[rbnd.edge!.direction.other] ?? bottommostSite;
-        // these three sites define a Delaunay triangle
-        // (not actually using these for anything...)
-        //_triangles.push(new Triangle(bottomSite, topSite, rightRegion(lbnd)));
-
-        final Vertex<num> v = lbnd.vertex!..setIndex();
-        lbnd.edge!.vertices[lbnd.edge!.direction] = v;
-        rbnd.edge!.vertices[rbnd.edge!.direction] = v;
-        edgeList.remove(lbnd);
-        heap.remove(rbnd.sortHash);
-        edgeList.remove(rbnd);
-        Direction direction = Direction.left;
-        if (bottomSite.y > topSite.y) {
-          (bottomSite, topSite) = (topSite, bottomSite);
-          direction = Direction.right;
-        }
-        final Edge edge = Edge.createBisectingEdge(bottomSite, topSite);
-        edges.add(edge);
-        final HalfEdge bisector = HalfEdge(Edge.fromOther(edge)..direction = direction);
-        edgeList.insertToRightOfHalfEdge(llbnd, bisector);
-        edge.vertices[direction.other] = v;
-        final Vertex<num>? rightVertex = Vertex.intersect(llbnd.edge, bisector.edge);
-        if (rightVertex != null) {
-          heap.remove(llbnd.sortHash);
-          llbnd
-            ..vertex = rightVertex
-            ..yStar = rightVertex.y + bottomSite.distanceTo(rightVertex);
-          heap[llbnd.sortHash] = llbnd;
-        }
-        final Vertex<num>? leftVertex = Vertex.intersect(bisector.edge, rrbnd.edge);
-        if (leftVertex != null) {
-          bisector
-            ..vertex = leftVertex
-            ..yStar = leftVertex.y + bottomSite.distanceTo(leftVertex);
-          heap[bisector.sortHash] = bisector;
-        }
+        handleSmallestIntersection();
       } else {
         break;
       }
     }
 
+    clipEdges();
+  }
+
+  void clipEdges() {
     for (final Edge edge in edges) {
       edge.clipVertices(_plotBounds);
     }

@@ -59,8 +59,8 @@ class Site<T extends num> extends Point<T> {
   }
 
   void reorderEdges() {
-    final EdgeReorderer<Vertex<num>> reorderer = EdgeReorderer<Vertex<num>>(edges);
-    edges = reorderer.edges.toList();
+    final EdgeReorderer reorderer = EdgeReorderer(edges, (Edge edge) => edge.vertices as OrientedPair<Point<num>>);
+    edges = reorderer.orderedEdges.toList();
     isOrdered = true;
   }
 

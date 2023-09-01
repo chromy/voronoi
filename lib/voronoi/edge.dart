@@ -11,7 +11,7 @@ class Edge {
   Direction direction = Direction.none;
 
   // the two Voronoi vertices that the edge connects (if one of them is null, the edge extends to infinity)
-  OrientedPair<Vertex<num>?> vertices = OrientedPair<Vertex<num>?>(null, null);
+  OrientedPair<Point<num>?> vertices = OrientedPair<Point<num>?>(null, null);
 
   OrientedPair<Point<num>?> clippedVertices = OrientedPair<Point<num>?>(null, null);
 
@@ -29,12 +29,12 @@ class Edge {
   }
 
   /// This is the only way to create a new Edge
-  factory Edge.createBisectingEdge(Site<num> site0, Site<num> site1) {
+  factory Edge.createBisectingEdge(Site<num> a, Site<num> b) {
     ({num a, num b, num c}) equation;
 
-    final num dx = site1.x - site0.x;
-    final num dy = site1.y - site0.y;
-    final num c = site0.x * dx + site0.y * dy + (dx * dx + dy * dy) / 2;
+    final num dx = b.x - a.x;
+    final num dy = b.y - a.y;
+    final num c = a.x * dx + a.y * dy + (dx * dx + dy * dy) / 2;
     if (dx.abs() > dy.abs()) {
       equation = (a: 1, b: dy / dx, c: c / dx);
     } else {
@@ -42,13 +42,13 @@ class Edge {
     }
 
     final Edge edge = Edge()
-      ..sites = OrientedPair<Site<num>>(site0, site1)
+      ..sites = OrientedPair<Site<num>>(a, b)
       ..vertices.both = null
       ..clippedVertices.both = null
       ..equation = equation;
 
-    site0.addEdge(edge);
-    site1.addEdge(edge);
+    a.addEdge(edge);
+    b.addEdge(edge);
 
     return edge;
   }
@@ -58,7 +58,7 @@ class Edge {
 
   // Return a LineSegment representing the edge, or null if the edge isn't visible
   LineSegment<Point<num>>? voronoiEdge() =>
-      visible ? LineSegment<Point<num>>.fromOrientedPair(clippedVertices as OrientedPair<Vertex<num>>) : null;
+      visible ? LineSegment<Point<num>>.fromOrientedPair(clippedVertices as OrientedPair<Point<num>>) : null;
 
   bool isPartOfConvexHull() => !vertices.isDefined(Direction.both);
 
@@ -66,6 +66,36 @@ class Edge {
 
   // The only edges that should be visible are those whose clipped vertices are both non-null.
   bool get visible => !clippedVertices.isDefined(Direction.none);
+
+  Point<num>? intersect(Edge edge) {
+    if (sites.right == edge.sites.right) {
+      return null;
+    }
+
+    final num determinant = equation.a * edge.equation.b - equation.b * edge.equation.a;
+    if (determinant.abs() < 1.0e-10) {
+      // the edges are parallel
+      return null;
+    }
+
+    final Point<num> intersection = Point<num>(
+        (equation.c * edge.equation.b - edge.equation.c * equation.b) / determinant,
+        (edge.equation.c * equation.a - equation.c * edge.equation.a) / determinant);
+
+    if (intersection.x.isNaN || intersection.y.isNaN) {
+      return null;
+    }
+
+    final Edge leftEdge = sites.right.compareTo(edge.sites.right) < 0 ? this : edge;
+
+    final bool rightOfSite = intersection.x >= leftEdge.sites.right.x;
+    if ((rightOfSite && leftEdge.direction == Direction.left) ||
+        (!rightOfSite && leftEdge.direction == Direction.right)) {
+      return null;
+    }
+
+    return Point<num>(intersection.x, intersection.y);
+  }
 
   /// Set _clippedVertices to contain the two ends of the portion of the Voronoi edge that is visible
   /// within the bounds.  If no part of the Edge falls within the bounds, leave _clippedVertices null.
@@ -75,7 +105,7 @@ class Edge {
     final num xMax = bounds.right;
     final num yMax = bounds.bottom;
 
-    Vertex<num>? vertex0, vertex1;
+    Point<num>? vertex0, vertex1;
 
     if (equation.a == 1.0 && equation.b >= 0.0) {
       vertex0 = vertices.right;

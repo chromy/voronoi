@@ -6,7 +6,7 @@ class HalfEdge {
 
   Edge? edge;
 
-  Vertex<num>? vertex;
+  Point<num>? vertex;
 
   // the vertex's y-coordinate in the transformed Voronoi space V*
   num yStar = 0;

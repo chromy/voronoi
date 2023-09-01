@@ -1,10 +1,11 @@
 part of voronoi;
 
-class EdgeReorderer<T extends Point<num>> {
-  late final Iterable<Edge> edges;
+class EdgeReorderer {
+  late final Iterable<Edge> orderedEdges;
+  final OrientedPair<Point<num>> Function(Edge edge) extractor;
 
-  EdgeReorderer(Iterable<Edge> edges) {
-    edges = reorderEdges(edges);
+  EdgeReorderer(Iterable<Edge> edges, this.extractor) {
+    orderedEdges = reorderEdges(edges);
   }
 
   Iterable<Edge> reorderEdges(Iterable<Edge> edges) {
@@ -15,38 +16,10 @@ class EdgeReorderer<T extends Point<num>> {
     final Edge firstEdge = edges.first..direction = Direction.left;
     final ListQueue<Edge> newEdges = ListQueue<Edge>.of(<Edge>[firstEdge]);
 
-    T firstPoint, lastPoint;
-
-    switch (T) {
-      case const (Site<num>):
-        firstPoint = firstEdge.sites.left as T;
-        lastPoint = firstEdge.sites.right as T;
-        break;
-      case const (Vertex<num>):
-        firstPoint = firstEdge.vertices.left as T;
-        lastPoint = firstEdge.vertices.right as T;
-        if (firstPoint == Vertex.vertexAtInfinity || lastPoint == Vertex.vertexAtInfinity) {
-          return <Edge>[];
-        }
-        break;
-      default:
-        throw TypeError();
-    }
+    Point<num> firstPoint = firstEdge.sites.left;
+    Point<num> lastPoint = firstEdge.sites.right;
     for (final Edge edge in edges) {
-      OrientedPair<T> points;
-      switch (T) {
-        case const (Site<num>):
-          points = edge.sites as OrientedPair<T>;
-          break;
-        case const (Vertex<num>):
-          points = edge.vertices as OrientedPair<T>;
-          if (points.left == Vertex.vertexAtInfinity || points.right == Vertex.vertexAtInfinity) {
-            return <Edge>[];
-          }
-          break;
-        default:
-          throw TypeError();
-      }
+      final OrientedPair<Point<num>> points = extractor(edge);
       if (points.left == lastPoint) {
         lastPoint = points.right;
         edge.direction = Direction.left;
