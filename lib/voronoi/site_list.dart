@@ -31,20 +31,10 @@ class SiteList<T extends num> extends ListBase<Site<T>> {
     }
   }
 
-  math.Rectangle<num> getSitesBounds() {
-    if (isEmpty) {
-      throw StateError("Can not get bounds for an empty SiteList");
-    }
-
-    sort();
-
-    final num xMin = reduce((Site<T> minSite, Site<T> site) => site.x < minSite.x ? site : minSite).x;
-    final num xMax = reduce((Site<T> maxSite, Site<T> site) => site.x > maxSite.x ? site : maxSite).x;
-    final num yMin = reduce((Site<T> minSite, Site<T> site) => site.y < minSite.y ? site : minSite).y;
-    final num yMax = reduce((Site<T> maxSite, Site<T> site) => site.y > maxSite.y ? site : maxSite).y;
-
-    return math.Rectangle<num>(xMin, yMin, xMax - xMin, yMax - yMin);
-  }
+  ({num min, num max}) getXRange() => (
+        min: reduce((Site<T> minSite, Site<T> site) => site.x < minSite.x ? site : minSite).x,
+        max: reduce((Site<T> maxSite, Site<T> site) => site.x > maxSite.x ? site : maxSite).x
+      );
 
   /// @return the largest circle centered at each site that fits in its region;
   /// if the region is infinite, return no circle for that region.

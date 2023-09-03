@@ -13,15 +13,16 @@ final VoronoiDemo demo = VoronoiDemo(canvas, 10, math.Random().nextInt(100000));
 num fpsAverage = 0;
 
 void main() {
-  demo.start();
   slider.onChange.listen((Event e) => update());
   button.onClick.listen((MouseEvent e) => randomiseSeed());
-  update();
+  update(); // Call update() once to generate the diagram without waiting for user input.
 }
 
 void update() {
-  demo.sites = int.parse(slider.value ?? "");
-  demo.recompute();
+  demo.sites = math.pow(2, num.parse(slider.value ?? "")).toInt();
+  demo
+    ..recompute()
+    ..requestRedraw();
 }
 
 void randomiseSeed() {
@@ -32,28 +33,16 @@ void randomiseSeed() {
 class VoronoiDemo {
   CanvasElement canvas;
 
-  num width = 100;
-  num height = 100;
+  late num width;
+  late num height;
   int sites;
   int seed;
 
   late Voronoi voronoi;
 
-  VoronoiDemo(this.canvas, this.sites, this.seed);
-
-  // Initialize the diagram.
-  void start() {
-    // Measure the canvas element.
-    final math.Rectangle<num> rect = canvas.parent!.client;
-    width = rect.width;
-    height = rect.height;
-    canvas.width = width.toInt();
-
-    // Compute diagram.
-    recompute();
-
-    // Draw diagram.
-    requestRedraw();
+  VoronoiDemo(this.canvas, this.sites, this.seed) {
+    width = canvas.clientWidth;
+    height = canvas.clientHeight;
   }
 
   void recompute() {
@@ -71,12 +60,10 @@ class VoronoiDemo {
   }
 
   void draw(num _) {
-    // Draw
     final CanvasRenderingContext2D context = canvas.context2D;
     drawBackground(context);
     drawLines(context);
     drawSites(context);
-    requestRedraw();
   }
 
   /// Clear the background to white.
@@ -86,30 +73,46 @@ class VoronoiDemo {
 
   /// Draw the sites of the cells on context.
   void drawSites(CanvasRenderingContext2D context) {
+    // Make the indicator for each site a different size depending on how many there are, with larger ones when there are fewer sites and smaller ones when there are more (down to a size of 1 at around 3300 sites).
+    final num size = (50 / math.log(voronoi.sites.length * 4) - 4.3).clamp(0.5, 20);
     for (final Point<num> site in voronoi.sites) {
-      context
-        ..fillStyle = '#ccc'
-        ..beginPath()
-        ..arc(site.x, site.y, 1, 0, math.pi * 2, true)
-        ..closePath()
-        ..fill();
+      if (size <=
+          1) /* Past a certain point drawing circles looks bad, so just set single pixel rectangles instead. */ {
+        context
+          ..fillStyle = '#f55'
+          ..fillRect(site.x, site.y, 1, 1);
+      } else {
+        context
+          ..fillStyle = '#f55'
+          ..beginPath()
+          ..arc(site.x, site.y, size, 0, math.pi * 2)
+          ..closePath()
+          ..fill();
+      }
     }
   }
 
   /// Draw the edges of the cells on context.
   void drawLines(CanvasRenderingContext2D context) {
-    // Don't consider edges which have been clipped completely away.
-    final Iterable<Edge> edges = voronoi.edges.where((Edge edge) => edge.visible);
+    // Don't draw edges which have been clipped completely away.
+    final List<Edge> edges = voronoi.edges.where((Edge edge) => edge.isVisible).toList();
+
+    const int maxFancyEdgeLimit = 25000;
+
+    context
+      ..strokeStyle = '#ccf'
+      // If there are too many edges, make them thinner so they can be seen better.
+      ..lineWidth = edges.length < maxFancyEdgeLimit ? 1 : 0.7;
 
     for (final Edge edge in edges) {
-      // Create gradient
-      final CanvasGradient lingrad = context.createLinearGradient(edge.clippedVertices.left!.x,
-          edge.clippedVertices.left!.y, edge.clippedVertices.right!.x, edge.clippedVertices.right!.y)
-        ..addColorStop(0, '#f00')..addColorStop(1, '#0f0');
-
+      // Past a certain point, defining the gradients takes a significant amount of time, and the edges become too small to notice it anyway, so only add the gradient when it's worthwhile.
+      if (edges.length < maxFancyEdgeLimit) {
+        context.strokeStyle = context.createLinearGradient(edge.clippedVertices.left!.x, edge.clippedVertices.left!.y,
+            edge.clippedVertices.right!.x, edge.clippedVertices.right!.y)
+          ..addColorStop(0, '#85f')
+          ..addColorStop(1, '#0f0');
+      }
       context
-        ..strokeStyle = lingrad
-        ..lineWidth = 1
         ..beginPath()
         ..moveTo(edge.clippedVertices.left!.x, edge.clippedVertices.left!.y)
         ..lineTo(edge.clippedVertices.right!.x, edge.clippedVertices.right!.y)

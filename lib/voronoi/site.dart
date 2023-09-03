@@ -65,7 +65,7 @@ class Site<T extends num> extends Point<T> {
   }
 
   List<Point<num>> clipToBounds(math.Rectangle<num> bounds) {
-    final Edge firstVisibleEdge = edges.firstWhere((Edge edge) => edge.visible);
+    final Edge firstVisibleEdge = edges.firstWhere((Edge edge) => edge.isVisible);
     final List<Point<num>> points = <Point<num>>[
       firstVisibleEdge.clippedVertices[firstVisibleEdge.direction]!,
       firstVisibleEdge.clippedVertices[firstVisibleEdge.direction.other]!
@@ -73,7 +73,7 @@ class Site<T extends num> extends Point<T> {
 
     edges
         .where((Edge edge) => edge != firstVisibleEdge)
-        .where((Edge edge) => edge.visible)
+        .where((Edge edge) => edge.isVisible)
         .forEach((Edge edge) => connect(points, edge, bounds));
 
     // close up the polygon by adding another corner point of the bounds if needed:

@@ -68,5 +68,5 @@ class OrientedPair<T> {
   }
 
   @override
-  String toString() => "OrientedPair<$T>(Left: $left, Right: $right)";
+  String toString() => "(left: $left, right: $right)";
 }

@@ -39,7 +39,7 @@ class HalfEdge {
       return false;
     }
 
-    if (edge!.equation.a == 1) {
+    if (edge!.equation.a == 1) /* The edge is more horizontal than it is vertical */ {
       bool fast = false;
       final num dyP = point.y - topSite.y;
       final num dxP = point.x - topSite.x;
@@ -63,11 +63,11 @@ class HalfEdge {
           above = !above;
         }
       }
-    } else /* edge.b == 1.0 */ {
-      final num yl = edge!.equation.c - edge!.equation.a * point.x;
-      final num t1 = point.y - yl;
-      final num t2 = point.x - topSite.x;
-      final num t3 = yl - topSite.y;
+    } else /* edge.equation.b == 1, the edge is more vertical than horizontal */ {
+      final num yl = edge!.equation.c - edge!.equation.a * point.x; // Solving the edge's equation at point.x
+      final num t1 = point.y - yl; // How far above the edge the point is vertically
+      final num t2 = point.x - topSite.x; // How far to the right of topSite the point is
+      final num t3 = yl - topSite.y; // How far above the topSite the edge is
       above = t1 * t1 > t2 * t2 + t3 * t3;
     }
 

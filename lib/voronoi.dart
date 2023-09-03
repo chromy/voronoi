@@ -103,8 +103,9 @@ class Voronoi {
     }
 
     final SplayTreeMap<int, HalfEdge> heap = SplayTreeMap<int, HalfEdge>();
-    final math.Rectangle<num> dataBounds = siteList.getSitesBounds();
-    final EdgeList edgeList = EdgeList(dataBounds.left, dataBounds.width, siteList.length);
+    final ({num min, num max}) sitesXRange = siteList.getXRange();
+    final EdgeList edgeList = EdgeList(sitesXRange.min, sitesXRange.max, siteList.length);
+    siteList.sort();
     final Site<num> bottommostSite = siteList.next()!;
 
     void pushHalfEdge(HalfEdge halfEdge, Edge bisectorEdge, Site<num> site) {
@@ -124,11 +125,11 @@ class Voronoi {
 
       final Site<num> bottomSite = rbndEdge?.sites[rbndEdge.direction] ?? bottommostSite;
 
-      final Edge edge = Edge.createBisectingEdge(bottomSite, newSite);
+      final Edge edge = Edge.createBisectingEdge(OrientedPair<Site<num>>(bottomSite, newSite));
       edges.add(edge);
 
-      final HalfEdge leftBisector = HalfEdge(Edge.fromOther(edge)..direction = Direction.left);
-      final HalfEdge rightBisector = HalfEdge(Edge.fromOther(edge)..direction = Direction.right);
+      final HalfEdge leftBisector = HalfEdge(edge.copy()..direction = Direction.left);
+      final HalfEdge rightBisector = HalfEdge(edge.copy()..direction = Direction.right);
       edgeList
         ..insertToRightOfHalfEdge(lbnd, leftBisector)
         ..insertToRightOfHalfEdge(leftBisector, rightBisector);
@@ -159,11 +160,11 @@ class Voronoi {
       heap.remove(rbnd.sortHash);
       edgeList.remove(rbnd);
 
-      final Edge edge = Edge.createBisectingEdge(bottomSite, topSite);
+      final Edge edge = Edge.createBisectingEdge(OrientedPair<Site<num>>(bottomSite, topSite));
       edges.add(edge);
       edge.vertices[direction.other] = lbnd.vertex;
 
-      final HalfEdge bisector = HalfEdge(Edge.fromOther(edge)..direction = direction);
+      final HalfEdge bisector = HalfEdge(edge.copy()..direction = direction);
       edgeList.insertToRightOfHalfEdge(llbnd, bisector);
       pushHalfEdge(llbnd, bisector.edge!, bottomSite);
       if (rrbndEdge != null) {

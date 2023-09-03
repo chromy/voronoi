@@ -17,13 +17,15 @@ class Point<T extends num> extends math.Point<T> implements Comparable<Point<T>>
   @override
   int compareTo(Point<T> other) => this.hashCode - other.hashCode;
 
-  @override
-
   /// [Point]s are considered to be equal if both components of their coordinates are close enough that they are within [epsilon] pixels of one another.
+  @override
   bool operator ==(Object other) => other is Point<T> && hashCode == other.hashCode;
 
   @override
   int get hashCode => hashCoordinates(x, y);
+
+  @override
+  String toString() => "(${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})";
 
   /// Calculates the hashCode for this object consistent with the idea that two [Point]s with coordinates that differ by no more than [epsilon] are considered equal, and with changes in value of [y] being more meaningful than changes in [x]. As a performance optimization, this is a static method to allow for other classes to also use this logic without having to fully instantiate a [Point] object.
   static int hashCoordinates<T extends num>(T x, T y) => (y * yScaling).floor() + (x / epsilon).floor();

@@ -53,9 +53,7 @@ class EdgeList extends ListBase<HalfEdge?> {
 
     halfEdge.edgeListLeftNeighbor!.edgeListRightNeighbor = halfEdge.edgeListRightNeighbor;
     halfEdge.edgeListRightNeighbor!.edgeListLeftNeighbor = halfEdge.edgeListLeftNeighbor;
-    halfEdge
-      ..edge = Edge.deleted
-      ..edgeListLeftNeighbor = halfEdge.edgeListRightNeighbor = null;
+    halfEdge.edgeListLeftNeighbor = halfEdge.edgeListRightNeighbor = null;
 
     return true;
   }
@@ -102,7 +100,7 @@ class EdgeList extends ListBase<HalfEdge?> {
     }
 
     final HalfEdge? halfEdge = this[b];
-    if (halfEdge != null && halfEdge.edge == Edge.deleted) {
+    if (halfEdge != null && halfEdge.edgeListLeftNeighbor == null && halfEdge.edgeListRightNeighbor == null) {
       /* Hash table points to deleted halfEdge.  Patch as necessary. */
       this[b] = null;
       // still can't dispose halfEdge yet!
